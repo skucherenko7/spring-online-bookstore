@@ -1,7 +1,7 @@
 package mate.academy.spring.online.bookstore.repository;
 
-import jakarta.persistence.criteria.CriteriaQuery;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import mate.academy.spring.online.bookstore.exception.DataProcessingException;
 import mate.academy.spring.online.bookstore.model.Book;
@@ -38,12 +38,20 @@ public class BookRepositoryImpl implements BookRepository {
     }
 
     @Override
+    public Optional<Book> findBookById(Long id) {
+        try (Session session = sessionFactory.openSession()) {
+            Book book = session.get(Book.class, id);
+            return Optional.ofNullable(book);
+        } catch (Exception e) {
+            throw new DataProcessingException("Can't find book by id", e);
+        }
+    }
+
+    @Override
     public List<Book> findAll() {
         try (Session session = sessionFactory.openSession()) {
-            CriteriaQuery<Book> criteriaQuery = session.getCriteriaBuilder()
-                    .createQuery(Book.class);
-            criteriaQuery.from(Book.class);
-            return session.createQuery(criteriaQuery).getResultList();
+            return session.createQuery("SELECT b FROM Book b", Book.class)
+                    .getResultList();
         } catch (Exception e) {
             throw new DataProcessingException("Can't get all books", e);
         }
