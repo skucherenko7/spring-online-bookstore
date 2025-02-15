@@ -8,12 +8,11 @@ public class IsbnValidator implements ConstraintValidator<Isbn, String> {
             "^(?=(?:\\D*\\d){10}(?:(?:\\D*\\d){3})?$)[\\d-]+$";
 
     @Override
-    public boolean isValid(String s, ConstraintValidatorContext context) {
+    public boolean isIsbnValid(String s, ConstraintValidatorContext context) {
         if (s == null) {
             return false;
         }
-        boolean isValid = s.matches(ISBN_PATTERN);
-        System.out.println("ISBN validation result: " + isValid);
-        return isValid;
+        boolean isIsbnValid = s.matches(ISBN_PATTERN);
+        return isIsbnValid;
     }
 }
