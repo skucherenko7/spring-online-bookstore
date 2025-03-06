@@ -1,5 +1,5 @@
 databaseChangeLog:
   - include:
-      file: classpath:/db/changelog/changes/01-create-books-table.yaml
+      file: /db/changelog/changes/01-create-books-table.yaml
   - include:
-      file: classpath:/db/changelog/changes/02-create-users-table.yaml
+      file: /db/changelog/changes/02-create-users-table.yaml
