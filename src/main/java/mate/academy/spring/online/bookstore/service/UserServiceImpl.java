@@ -20,22 +20,12 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserResponseDto register(UserRegistrationRequestDto requestDto)
             throws RegistrationException {
-        System.out.println("Checking if email exists: " + requestDto.getEmail());
 
         if (userRepository.existsByEmail(requestDto.getEmail())) {
-            System.out.println("Email already exists: " + requestDto.getEmail());
-            throw new RegistrationException("Email already exists");
+            throw new RegistrationException("This email already exists");
         }
-        System.out.println("Email is unique. Proceeding "
-                + "with saving the user: " + requestDto.getEmail());
-
         User user = userMapper.requestDtoToUser(requestDto);
-        System.out.println("User object before save: " + user);
-
         user = userRepository.save(user);
-        System.out.println("User saved with ID: " + user.getId());
-
         return userMapper.userToUserDto(user);
     }
 }
-

@@ -41,6 +41,6 @@ public class Book {
 
     private String coverImage;
 
-    @Column(name = "is_deleted", nullable = false)
+    @Column(nullable = false, columnDefinition = "TINYINT", length = 1)
     private boolean isDeleted;
 }
