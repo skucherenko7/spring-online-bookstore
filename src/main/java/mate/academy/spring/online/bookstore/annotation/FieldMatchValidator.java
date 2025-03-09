@@ -4,6 +4,8 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import mate.academy.spring.online.bookstore.dto.UserRegistrationRequestDto;
 
+import java.util.Objects;
+
 public class FieldMatchValidator implements
         ConstraintValidator<FieldMatch, UserRegistrationRequestDto> {
 
@@ -18,6 +20,6 @@ public class FieldMatchValidator implements
         if (dto == null) {
             return true;
         }
-        return dto.getPassword().equals(dto.getRepeatPassword());
+        return Objects.equals(dto.getPassword(), dto.getRepeatPassword());
     }
 }

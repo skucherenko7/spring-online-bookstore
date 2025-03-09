@@ -25,7 +25,7 @@ public class UserServiceImpl implements UserService {
             throw new RegistrationException("This email already exists");
         }
         User user = userMapper.requestDtoToUser(requestDto);
-        user = userRepository.save(user);
+        userRepository.save(user);
         return userMapper.userToUserDto(user);
     }
 }
