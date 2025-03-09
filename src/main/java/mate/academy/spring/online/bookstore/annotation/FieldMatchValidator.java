@@ -17,9 +17,6 @@ public class FieldMatchValidator implements
     @Override
     public boolean isValid(UserRegistrationRequestDto dto,
                            ConstraintValidatorContext constraintValidatorContext) {
-        if (dto == null) {
-            return true;
-        }
         return Objects.equals(dto.getPassword(), dto.getRepeatPassword());
     }
 }
