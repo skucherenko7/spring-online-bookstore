@@ -1,0 +1,22 @@
+databaseChangeLog:
+  - changeSet:
+      id: insert-users-testing-table
+      author: root
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: email, value: "user111@example.com" }
+              - column: { name: password, value: "$2a$10$WlHqEbjYKo0FKQUYC1ppUOGaDj7dRW6USZ7gIzt9UXkajr4X2wXC2" }
+              - column: { name: first_name, value: "User111" }
+              - column: { name: last_name, value: "User111" }
+              - column: { name: shipping_address, value: "145 Main St, City, Country" }
+
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: email, value: "admin@example.com" }
+              - column: { name: password, value: "$2a$10$zf7jkAsSrT1PjrIIuJGk9uO3.Ct.hGOeGG0RcHBIbKKU2sFnySlEK" }
+              - column: { name: first_name, value: "Admin" }
+              - column: { name: last_name, value: "Admin" }
+              - column: { name: shipping_address, value: "admin shipping address" }

@@ -1,0 +1,32 @@
+databaseChangeLog:
+  - changeSet:
+      id: insert-users-roles-testing-table
+      author: root
+      changes:
+        - insert:
+            tableName: users_roles
+            columns:
+              - column:
+                  name: user_id
+                  valueComputed: "(SELECT id FROM users WHERE email = 'user111@example.com' LIMIT 1)"
+              - column:
+                  name: role_id
+                  valueComputed: "(SELECT id FROM roles WHERE role = 'USER' LIMIT 1)"
+        - insert:
+            tableName: users_roles
+            columns:
+              - column:
+                  name: user_id
+                  valueComputed: "(SELECT id FROM users WHERE email = 'admin@example.com' LIMIT 1)"
+              - column:
+                  name: role_id
+                  valueComputed: "(SELECT id FROM roles WHERE role = 'ADMIN' LIMIT 1)"
+        - insert:
+            tableName: users_roles
+            columns:
+              - column:
+                  name: user_id
+                  valueComputed: "(SELECT id FROM users WHERE email = 'admin@example.com' LIMIT 1)"
+              - column:
+                  name: role_id
+                  valueComputed: "(SELECT id FROM roles WHERE role = 'USER' LIMIT 1)"
