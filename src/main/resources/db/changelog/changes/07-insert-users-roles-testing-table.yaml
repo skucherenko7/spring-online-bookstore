@@ -8,25 +8,25 @@ databaseChangeLog:
             columns:
               - column:
                   name: user_id
-                  valueComputed: "(SELECT id FROM users WHERE email = 'user111@example.com' LIMIT 1)"
+                  valueComputed: "(SELECT id FROM users WHERE email = 'user111@example.com')"
               - column:
                   name: role_id
-                  valueComputed: "(SELECT id FROM roles WHERE role = 'USER' LIMIT 1)"
+                  valueComputed: "(SELECT id FROM roles WHERE role = 'ROLE_USER')"
         - insert:
             tableName: users_roles
             columns:
               - column:
                   name: user_id
-                  valueComputed: "(SELECT id FROM users WHERE email = 'admin@example.com' LIMIT 1)"
+                  valueComputed: "(SELECT id FROM users WHERE email = 'admin@example.com')"
               - column:
                   name: role_id
-                  valueComputed: "(SELECT id FROM roles WHERE role = 'ADMIN' LIMIT 1)"
+                  valueComputed: "(SELECT id FROM roles WHERE role = 'ROLE_ADMIN')"
         - insert:
             tableName: users_roles
             columns:
               - column:
                   name: user_id
-                  valueComputed: "(SELECT id FROM users WHERE email = 'admin@example.com' LIMIT 1)"
+                  valueComputed: "(SELECT id FROM users WHERE email = 'admin@example.com')"
               - column:
                   name: role_id
-                  valueComputed: "(SELECT id FROM roles WHERE role = 'USER' LIMIT 1)"
+                  valueComputed: "(SELECT id FROM roles WHERE role = 'ROLE_USER')"

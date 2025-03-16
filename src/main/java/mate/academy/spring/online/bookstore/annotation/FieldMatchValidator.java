@@ -2,9 +2,8 @@ package mate.academy.spring.online.bookstore.annotation;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import mate.academy.spring.online.bookstore.dto.UserRegistrationRequestDto;
-
 import java.util.Objects;
+import mate.academy.spring.online.bookstore.dto.UserRegistrationRequestDto;
 
 public class FieldMatchValidator implements
         ConstraintValidator<FieldMatch, UserRegistrationRequestDto> {
