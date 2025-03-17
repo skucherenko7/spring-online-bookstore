@@ -13,9 +13,13 @@ public class CreateBookRequestDto {
     @NotBlank(message = "Author is required")
     private String author;
 
-    @NotBlank(message = "ISBN is required")
     private String isbn;
+
     private BigDecimal price;
+
     private String description;
+
     private String coverImage;
+
+    private boolean deleted;
 }
