@@ -3,11 +3,14 @@ package mate.academy.spring.online.bookstore.service;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import mate.academy.spring.online.bookstore.dto.BookDto;
+import mate.academy.spring.online.bookstore.dto.BookSearchParametersDto;
 import mate.academy.spring.online.bookstore.dto.CreateBookRequestDto;
 import mate.academy.spring.online.bookstore.exception.EntityNotFoundException;
 import mate.academy.spring.online.bookstore.mapper.BookMapper;
 import mate.academy.spring.online.bookstore.model.Book;
 import mate.academy.spring.online.bookstore.repository.BookRepository;
+import mate.academy.spring.online.bookstore.repository.book.BookSpecificationBuilder;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,6 +18,7 @@ import org.springframework.stereotype.Service;
 public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
     private final BookMapper bookMapper;
+    private final BookSpecificationBuilder bookSpecificationBuilder;
 
     @Override
     public BookDto saveBook(CreateBookRequestDto bookRequestDto) {
@@ -48,5 +52,14 @@ public class BookServiceImpl implements BookService {
                 () -> new EntityNotFoundException("Book not found by id " + id));
         bookMapper.updateBookFromDto(requestDto, bookFetched);
         return bookMapper.toDto(bookRepository.save(bookFetched));
+    }
+
+    @Override
+    public List<BookDto> search(BookSearchParametersDto params) {
+        Specification<Book> bookSpecification = bookSpecificationBuilder.build(params);
+        return bookRepository.findAll(bookSpecification)
+                .stream()
+                .map(bookMapper::toDto)
+                .toList();
     }
 }
