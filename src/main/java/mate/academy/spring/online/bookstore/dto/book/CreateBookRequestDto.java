@@ -1,4 +1,4 @@
-package mate.academy.spring.online.bookstore.dto;
+package mate.academy.spring.online.bookstore.dto.book;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.DecimalMin;
