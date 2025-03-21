@@ -2,8 +2,8 @@ package mate.academy.spring.online.bookstore.service;
 
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
-import mate.academy.spring.online.bookstore.dto.UserRegistrationRequestDto;
-import mate.academy.spring.online.bookstore.dto.UserResponseDto;
+import mate.academy.spring.online.bookstore.dto.user.UserRegistrationRequestDto;
+import mate.academy.spring.online.bookstore.dto.user.UserResponseDto;
 import mate.academy.spring.online.bookstore.exception.RegistrationException;
 import mate.academy.spring.online.bookstore.mapper.UserMapper;
 import mate.academy.spring.online.bookstore.model.Role;

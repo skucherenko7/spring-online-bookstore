@@ -1,9 +1,9 @@
 package mate.academy.spring.online.bookstore.service;
 
 import lombok.RequiredArgsConstructor;
-import mate.academy.spring.online.bookstore.dto.BookDto;
-import mate.academy.spring.online.bookstore.dto.BookSearchParametersDto;
-import mate.academy.spring.online.bookstore.dto.CreateBookRequestDto;
+import mate.academy.spring.online.bookstore.dto.book.BookDto;
+import mate.academy.spring.online.bookstore.dto.book.BookSearchParametersDto;
+import mate.academy.spring.online.bookstore.dto.book.CreateBookRequestDto;
 import mate.academy.spring.online.bookstore.exception.EntityNotFoundException;
 import mate.academy.spring.online.bookstore.mapper.BookMapper;
 import mate.academy.spring.online.bookstore.model.Book;
