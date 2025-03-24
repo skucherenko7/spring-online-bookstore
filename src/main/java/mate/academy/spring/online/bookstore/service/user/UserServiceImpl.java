@@ -1,4 +1,4 @@
-package mate.academy.spring.online.bookstore.service;
+package mate.academy.spring.online.bookstore.service.user;
 
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -8,8 +8,8 @@ import mate.academy.spring.online.bookstore.exception.RegistrationException;
 import mate.academy.spring.online.bookstore.mapper.UserMapper;
 import mate.academy.spring.online.bookstore.model.Role;
 import mate.academy.spring.online.bookstore.model.User;
-import mate.academy.spring.online.bookstore.repository.RoleRepository;
-import mate.academy.spring.online.bookstore.repository.UserRepository;
+import mate.academy.spring.online.bookstore.repository.role.RoleRepository;
+import mate.academy.spring.online.bookstore.repository.user.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

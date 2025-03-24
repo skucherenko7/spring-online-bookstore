@@ -1,4 +1,4 @@
-package mate.academy.spring.online.bookstore.service;
+package mate.academy.spring.online.bookstore.service.book;
 
 import mate.academy.spring.online.bookstore.dto.book.BookDto;
 import mate.academy.spring.online.bookstore.dto.book.BookSearchParametersDto;
