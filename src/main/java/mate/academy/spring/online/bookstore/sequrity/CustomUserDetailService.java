@@ -2,7 +2,7 @@ package mate.academy.spring.online.bookstore.sequrity;
 
 import lombok.RequiredArgsConstructor;
 import mate.academy.spring.online.bookstore.exception.EntityNotFoundException;
-import mate.academy.spring.online.bookstore.repository.UserRepository;
+import mate.academy.spring.online.bookstore.repository.user.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;

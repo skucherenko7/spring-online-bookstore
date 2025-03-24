@@ -3,9 +3,11 @@ package mate.academy.spring.online.bookstore.dto.book;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
+import java.util.Set;
 import lombok.Data;
 import mate.academy.spring.online.bookstore.validation.Isbn;
 import org.hibernate.validator.constraints.URL;
@@ -45,4 +47,9 @@ public class CreateBookRequestDto {
 
     @Schema(description = "Indicates if the entity has been deleted.", example = "false")
     private boolean deleted;
+
+    @Schema(description = "List of category IDs associated with the book. "
+            + "This field should not be empty.", example = "[1, 2, 3]")
+    @NotEmpty(message = "At least one category must be selected!")
+    private Set<Long> categories;
 }

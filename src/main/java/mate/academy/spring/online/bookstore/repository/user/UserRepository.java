@@ -1,4 +1,4 @@
-package mate.academy.spring.online.bookstore.repository;
+package mate.academy.spring.online.bookstore.repository.user;
 
 import java.util.Optional;
 import mate.academy.spring.online.bookstore.model.User;
