@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
-import java.util.List;
+import java.util.Set;
 import lombok.Data;
 import mate.academy.spring.online.bookstore.validation.Isbn;
 import org.hibernate.validator.constraints.URL;
@@ -51,5 +51,5 @@ public class CreateBookRequestDto {
     @Schema(description = "List of category IDs associated with the book. "
             + "This field should not be empty.", example = "[1, 2, 3]")
     @NotEmpty(message = "At least one category must be selected!")
-    private List<Long> categories;
+    private Set<Long> categories;
 }
