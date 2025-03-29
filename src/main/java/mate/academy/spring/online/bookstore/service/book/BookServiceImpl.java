@@ -1,5 +1,6 @@
 package mate.academy.spring.online.bookstore.service.book;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import mate.academy.spring.online.bookstore.dto.book.BookDto;
 import mate.academy.spring.online.bookstore.dto.book.BookSearchParametersDto;
@@ -9,6 +10,7 @@ import mate.academy.spring.online.bookstore.mapper.BookMapper;
 import mate.academy.spring.online.bookstore.model.Book;
 import mate.academy.spring.online.bookstore.repository.book.BookRepository;
 import mate.academy.spring.online.bookstore.repository.book.BookSpecificationBuilder;
+import mate.academy.spring.online.bookstore.repository.category.CategoryRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -20,11 +22,19 @@ public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
     private final BookMapper bookMapper;
     private final BookSpecificationBuilder bookSpecificationBuilder;
+    private final CategoryRepository categoryRepository;
 
     @Override
-    public BookDto saveBook(CreateBookRequestDto bookRequestDto) {
-        Book book = bookMapper.toModel(bookRequestDto);
-        return bookMapper.toDto(bookRepository.save(book));
+    public BookDto saveBook(CreateBookRequestDto requestDto) {
+        List<Long> listCategories = requestDto.getCategories().stream()
+                .filter(categoryRepository::existsById)
+                .toList();
+        if (listCategories.isEmpty()) {
+            throw new EntityNotFoundException("There categories are not exist "
+                    + requestDto.getCategories());
+        }
+        Book book = bookRepository.save(bookMapper.toModel(requestDto));
+        return bookMapper.toDto(book);
     }
 
     @Override
