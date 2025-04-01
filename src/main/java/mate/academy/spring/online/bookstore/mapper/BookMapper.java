@@ -27,7 +27,7 @@ public interface BookMapper {
     default void setCategoryIds(@MappingTarget BookDto bookDto, Book book) {
         List<Long> categoriesIds = book.getCategories().stream()
                 .map(Category::getId)
-                .toList();
+                .collect(Collectors.toList());
         bookDto.setCategoriesIds(categoriesIds);
     }
 
@@ -48,5 +48,4 @@ public interface BookMapper {
                 .map(Book::new)
                 .orElse(null);
     }
-
 }

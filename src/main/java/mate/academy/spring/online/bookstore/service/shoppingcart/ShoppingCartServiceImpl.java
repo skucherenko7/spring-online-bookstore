@@ -16,11 +16,8 @@ import mate.academy.spring.online.bookstore.model.User;
 import mate.academy.spring.online.bookstore.repository.book.BookRepository;
 import mate.academy.spring.online.bookstore.repository.cartitem.CartItemRepository;
 import mate.academy.spring.online.bookstore.repository.shoppingcart.ShoppingCartRepository;
-import mate.academy.spring.online.bookstore.repository.user.UserRepository;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @Transactional
@@ -31,7 +28,6 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     private final CartItemRepository cartItemRepository;
     private final ShoppingCartMapper shoppingCartMapper;
     private final CartItemMapper cartItemMapper;
-    private final UserRepository userRepository;
 
     @Override
     public ShoppingCartDto addCartItem(
@@ -43,14 +39,6 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
                         + requestDto.bookId()));
 
         ShoppingCart cart = shoppingCartRepository.findByUserId(userId);
-        if (cart == null) {
-            cart = new ShoppingCart();
-            User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new EntityNotFoundException("Can't find user by id "
-                            + userId));
-            cart.setUser(user);
-            shoppingCartRepository.save(cart);
-        }
 
         Optional<CartItem> existingItem = cart.getCartItems().stream()
                 .filter(item -> item.getBook().getId().equals(requestDto.bookId()))
@@ -92,15 +80,9 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     @Override
     public void deleteCartItemById(Long id) {
         if (!cartItemRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "Can't find item by id " + id);
+            throw new EntityNotFoundException("Can`t find item by id " + id);
         }
-        try {
-            cartItemRepository.deleteById(id);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Failed to delete item", e);
-        }
+        cartItemRepository.deleteById(id);
     }
 
     @Override

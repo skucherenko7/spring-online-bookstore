@@ -24,11 +24,10 @@ import org.hibernate.annotations.SQLRestriction;
 @Entity
 @Getter
 @Setter
+@Table(name = "books")
 @SQLDelete(sql = "UPDATE books SET is_deleted = true WHERE id = ?")
 @SQLRestriction(value = "is_deleted = false")
-@Table(name = "books")
 @NoArgsConstructor
-
 public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -52,7 +51,7 @@ public class Book {
     private String coverImage;
 
     @Column(nullable = false, columnDefinition = "TINYINT", length = 1)
-    private boolean isDeleted;
+    private Boolean isDeleted;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(

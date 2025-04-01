@@ -1,6 +1,7 @@
 package mate.academy.spring.online.bookstore.service.user;
 
-import java.util.Set;
+import java.util.HashSet;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import mate.academy.spring.online.bookstore.dto.user.UserRegistrationRequestDto;
 import mate.academy.spring.online.bookstore.dto.user.UserResponseDto;
@@ -35,9 +36,9 @@ public class UserServiceImpl implements UserService {
         User user = userMapper.requestDtoToUser(requestDto);
         user.setPassword(passwordEncoder.encode(requestDto.getPassword()));
         Role role = roleRepository.findByRole(Role.RoleName.ROLE_USER);
-        user.setRoles(Set.of(role));
-        shoppingCartService.createNewShoppingCart(user);
+        user.setRoles(new HashSet<>(List.of(role)));
         userRepository.save(user);
+        shoppingCartService.createNewShoppingCart(user);
         return userMapper.userToUserDto(user);
     }
 }

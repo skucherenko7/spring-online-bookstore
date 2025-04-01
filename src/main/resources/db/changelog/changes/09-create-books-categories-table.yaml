@@ -12,15 +12,15 @@ databaseChangeLog:
               - column:
                   name: category_id
                   type: bigint
-              - addForeignKeyConstraint:
-                  baseTableName: books_categories
-                  constraintName: fk_books_categories_book
-                  referencedTableName: books
-                  baseColumnNames: book_id
-                  referencedColumnNames: id
-              - addForeignKeyConstraint:
-                  baseTableName: books_categories
-                  constraintName: fk_books_categories_category
-                  referencedTableName:
-                  baseColumnNames: category_id
-                  referencedColumnNames: id
+        - addForeignKeyConstraint:
+            baseTableName: books_categories
+            constraintName: fk_books_categories_book
+            referencedTableName: books
+            baseColumnNames: book_id
+            referencedColumnNames: id
+        - addForeignKeyConstraint:
+            baseTableName: books_categories
+            constraintName: fk_books_categories_category
+            referencedTableName: categories
+            baseColumnNames: category_id
+            referencedColumnNames: id
