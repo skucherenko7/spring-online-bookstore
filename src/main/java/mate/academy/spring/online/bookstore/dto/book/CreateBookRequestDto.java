@@ -45,9 +45,6 @@ public class CreateBookRequestDto {
     @URL(message = "Invalid cover image URL! Please, enter a valid URL!")
     private String coverImage;
 
-    @Schema(description = "Indicates if the entity has been deleted.", example = "false")
-    private boolean deleted;
-
     @Schema(description = "List of category IDs associated with the book. "
             + "This field should not be empty.", example = "[1, 2, 3]")
     @NotEmpty(message = "At least one category must be selected!")

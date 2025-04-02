@@ -2,7 +2,6 @@ package mate.academy.spring.online.bookstore.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -51,9 +50,9 @@ public class Book {
     private String coverImage;
 
     @Column(nullable = false, columnDefinition = "TINYINT", length = 1)
-    private Boolean isDeleted;
+    private boolean isDeleted;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany
     @JoinTable(
             name = "books_categories",
             joinColumns = @JoinColumn(name = "book_id"),
