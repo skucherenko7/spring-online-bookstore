@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -54,40 +55,33 @@ public class OrderController {
     }
 
     @PreAuthorize("hasRole('USER')")
-    @GetMapping("/{orderId}")
-    @Operation(summary = "Get a specific order",
-            description = "Show details of a specific order by its ID")
-    public OrderResponseDto getOrderById(
-            @PathVariable Long orderId,
-            Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
-        return orderService.findById(orderId);
-    }
-
-    @PreAuthorize("hasRole('USER')")
     @GetMapping("/{orderId}/items")
     @Operation(summary = "Get all items in a specific order",
-            description = "Show all items that are part of a specific order")
-    public List<OrderItemResponseDto> getOrderItems(@PathVariable Long orderId) {
-        return orderService.getOrderItems(orderId);
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @PatchMapping("/{orderId}")
-    public UpdateOrderStatusRequestDto updateOrderStatus(
-            @PathVariable Long orderId,
-            @RequestBody @Valid String newStatus
-    ) {
-        return orderService.updateOrderStatus(orderId, newStatus);
+            description = "Show all items that are part of a specific order for the current user")
+    public List<OrderItemResponseDto> getOrderItems(@PathVariable Long orderId,
+                                                    @AuthenticationPrincipal User user) {
+        Long userId = user.getId();
+        return orderService.getOrderItems(orderId, userId);
     }
 
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/{orderId}/items/{itemId}")
     @Operation(summary = "Get a specific order item",
             description = "Retrieve a specific OrderItem within an order")
-    public OrderItemResponseDto getOrderItem(
+    public OrderItemResponseDto getOrderItem(@PathVariable Long orderId,
+                                             @PathVariable Long itemId,
+                                             @AuthenticationPrincipal User user) {
+        Long userId = user.getId();
+        return orderService.getOrderItem(orderId, itemId, userId);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/{orderId}")
+    @Operation(summary = "Update order status",
+            description = "Update the status of an order by its ID")
+    public UpdateOrderStatusRequestDto updateOrderStatus(
             @PathVariable Long orderId,
-            @PathVariable Long itemId) {
-        return orderService.getOrderItem(orderId, itemId);
+            @RequestBody @Valid UpdateOrderStatusRequestDto updateOrderStatusRequestDto) {
+        return orderService.updateOrderStatus(orderId, updateOrderStatusRequestDto);
     }
 }

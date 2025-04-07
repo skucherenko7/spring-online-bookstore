@@ -12,13 +12,14 @@ import org.springframework.data.domain.Pageable;
 public interface OrderService {
     OrderResponseDto save(User user, CreateOrderRequestDto createOrderRequestDto);
 
-    List<OrderItemResponseDto> getOrderItems(Long id);
+    List<OrderItemResponseDto> getOrderItems(Long orderId, Long userId);
 
-    public UpdateOrderStatusRequestDto updateOrderStatus(Long orderId, String newStatus);
+    UpdateOrderStatusRequestDto updateOrderStatus(Long orderId, UpdateOrderStatusRequestDto
+            updateOrderStatusRequestDto);
 
     OrderResponseDto findById(Long id);
 
     Page<OrderResponseDto> findAll(User user, Pageable pageable);
 
-    OrderItemResponseDto getOrderItem(Long orderId, Long itemId);
+    OrderItemResponseDto getOrderItem(Long orderId, Long itemId, Long userId);
 }
