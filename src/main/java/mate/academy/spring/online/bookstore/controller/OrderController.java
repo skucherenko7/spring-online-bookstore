@@ -11,9 +11,9 @@ import mate.academy.spring.online.bookstore.dto.order.UpdateOrderStatusRequestDt
 import mate.academy.spring.online.bookstore.dto.orderitem.OrderItemResponseDto;
 import mate.academy.spring.online.bookstore.model.User;
 import mate.academy.spring.online.bookstore.service.order.OrderService;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -37,7 +37,7 @@ public class OrderController {
     @GetMapping
     @Operation(summary = "Get a user's order history",
             description = "Retrieve the list of orders placed by a user")
-    public Page<OrderResponseDto> getUserOrders(Authentication authentication, Pageable pageable) {
+    public List<OrderResponseDto> getUserOrders(Authentication authentication, Pageable pageable) {
         User user = (User) authentication.getPrincipal();
         return orderService.findAll(user, pageable);
     }
@@ -68,20 +68,24 @@ public class OrderController {
     @GetMapping("/{orderId}/items/{itemId}")
     @Operation(summary = "Get a specific order item",
             description = "Retrieve a specific OrderItem within an order")
-    public OrderItemResponseDto getOrderItem(@PathVariable Long orderId,
-                                             @PathVariable Long itemId,
-                                             @AuthenticationPrincipal User user) {
+    public ResponseEntity<OrderItemResponseDto> getOrderItem(
+            @PathVariable Long orderId,
+            @PathVariable Long itemId,
+            @AuthenticationPrincipal User user) {
         Long userId = user.getId();
-        return orderService.getOrderItem(orderId, itemId, userId);
+        OrderItemResponseDto orderItemResponse = orderService.getOrderItem(orderId, itemId, userId);
+        return ResponseEntity.ok(orderItemResponse);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{orderId}")
-    @Operation(summary = "Update order status",
-            description = "Update the status of an order by its ID")
-    public UpdateOrderStatusRequestDto updateOrderStatus(
+    @Operation(summary = "Update order status", description = "Update "
+            + "the status of an order by its ID")
+    public ResponseEntity<UpdateOrderStatusRequestDto> updateOrderStatus(
             @PathVariable Long orderId,
             @RequestBody @Valid UpdateOrderStatusRequestDto updateOrderStatusRequestDto) {
-        return orderService.updateOrderStatus(orderId, updateOrderStatusRequestDto);
+        UpdateOrderStatusRequestDto updatedOrder = orderService.updateOrderStatus(orderId,
+                updateOrderStatusRequestDto);
+        return ResponseEntity.ok(updatedOrder);
     }
 }
