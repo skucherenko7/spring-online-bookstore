@@ -42,5 +42,9 @@ public class ShoppingCart {
         cartItem.setShoppingCart(this);
         cartItems.add(cartItem);
     }
+
+    public void clear() {
+        this.cartItems.clear();
+    }
 }
 
