@@ -5,7 +5,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import mate.academy.spring.online.bookstore.dto.order.CreateOrderRequestDto;
 import mate.academy.spring.online.bookstore.dto.order.OrderResponseDto;
@@ -91,7 +90,7 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.findByUser(user, pageable)
                 .stream()
                 .map(orderMapper::toDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
