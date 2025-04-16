@@ -1,4 +1,4 @@
-package mate.academy.spring.online.bookstore.sequrity;
+package mate.academy.spring.online.bookstore.security;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 

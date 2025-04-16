@@ -1,6 +1,7 @@
 package mate.academy.spring.online.bookstore.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+@SecurityRequirement(name = "BearerAuth")
 @Tag(name = "Category", description = "Endpoints for managing categories")
 @RestController
 @RequestMapping("/categories")

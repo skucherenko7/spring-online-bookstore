@@ -9,7 +9,7 @@ import mate.academy.spring.online.bookstore.dto.user.UserLoginResponseDto;
 import mate.academy.spring.online.bookstore.dto.user.UserRegistrationRequestDto;
 import mate.academy.spring.online.bookstore.dto.user.UserResponseDto;
 import mate.academy.spring.online.bookstore.exception.RegistrationException;
-import mate.academy.spring.online.bookstore.sequrity.AuthenticationService;
+import mate.academy.spring.online.bookstore.security.AuthenticationService;
 import mate.academy.spring.online.bookstore.service.user.UserService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
