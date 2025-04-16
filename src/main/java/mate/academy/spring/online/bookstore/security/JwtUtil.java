@@ -1,4 +1,4 @@
-package mate.academy.spring.online.bookstore.sequrity;
+package mate.academy.spring.online.bookstore.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;

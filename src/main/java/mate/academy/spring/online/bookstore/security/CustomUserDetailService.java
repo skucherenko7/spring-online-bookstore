@@ -1,4 +1,4 @@
-package mate.academy.spring.online.bookstore.sequrity;
+package mate.academy.spring.online.bookstore.security;
 
 import lombok.RequiredArgsConstructor;
 import mate.academy.spring.online.bookstore.exception.EntityNotFoundException;
