@@ -9,9 +9,11 @@ import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.util.Set;
 import lombok.Data;
+import lombok.experimental.Accessors;
 import mate.academy.spring.online.bookstore.validation.Isbn;
 import org.hibernate.validator.constraints.URL;
 
+@Accessors(chain = true)
 @Data
 @Schema(description = "Request DTO for creating a new book.")
 public class CreateBookRequestDto {
