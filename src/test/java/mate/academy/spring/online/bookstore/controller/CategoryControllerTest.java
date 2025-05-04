@@ -153,7 +153,7 @@ class CategoryControllerTest {
     @DisplayName("Get books by category ID")
     @WithMockUser(username = "user", roles = {"USER"})
     void getBooksByCategoryId_ValidId_ShouldReturnListOfBooks() throws Exception {
-        Long categoryId = 2L; // ID категорії, для якої точно є книги в базі
+        Long categoryId = 2L;
 
         MvcResult result = mockMvc.perform(get("/categories/{id}/books", categoryId)
                         .contentType(MediaType.APPLICATION_JSON))

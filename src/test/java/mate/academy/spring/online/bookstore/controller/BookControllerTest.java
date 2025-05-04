@@ -1,54 +1,41 @@
 package mate.academy.spring.online.bookstore.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import mate.academy.spring.online.bookstore.dto.book.BookDto;
 import mate.academy.spring.online.bookstore.dto.book.CreateBookRequestDto;
-import mate.academy.spring.online.bookstore.exception.EntityNotFoundException;
-import mate.academy.spring.online.bookstore.service.book.BookService;
 import org.junit.jupiter.api.*;
-import org.mockito.Mock;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import javax.sql.DataSource;
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.Set;
+
 import static mate.academy.spring.online.bookstore.example.BookUtil.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ExtendWith(SpringExtension.class)
-
-public class BookControllerTest {
-    private static final String INSERT_BOOKS_SCRIPT_PATH =
-            "database/books/insert-books-with-categories-to-test-db.sql";
+public class BookControllerTest {private static final String INSERT_BOOKS_SCRIPT_PATH =
+        "database/books/insert-books-with-categories-to-test-db.sql";
     private static final String INSERT_CATEGORIES_SCRIPT_PATH =
             "database/category/insert-categories-to-test-db.sql";
     private static final String REMOVE_ALL_SCRIPT_PATH =
             "database/delete-all-data-db.sql";
     private static MockMvc mockMvc;
-
-    @Mock
-    private BookService bookService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -75,35 +62,28 @@ public class BookControllerTest {
         }
     }
 
-    @Test
-    @DisplayName("Create book with valid data")
-    @WithMockUser(username = "admin", roles = {"ADMIN"})
-    void createBook_ValidData_ShouldReturnCreatedBookDto() throws Exception {
-        CreateBookRequestDto requestDto = new CreateBookRequestDto()
-                .setTitle("Kobzar")
-                .setAuthor("Shevchenko")
-                .setIsbn("978-1234561999")
-                .setPrice(new BigDecimal("1200.00"))
-                .setDescription("Updated description")
-                .setCoverImage("https://example.com/updated-cover-image.jpg")
-                .setCategories(Set.of(2L));
+        @Test
+        @DisplayName("Create book with valid data")
+        @WithMockUser(username = "admin", roles = {"ADMIN"})
+        void createBook_ValidData_ShouldReturnCreatedBookDto() throws Exception {
+            Long testId = 3L;
 
-        String jsonRequest = objectMapper.writeValueAsString(requestDto);
+            BookDto expectedDto = createExpectedBookDto(testId);
+            CreateBookRequestDto requestDto = creatBookRequestDto();
 
-        MvcResult result = mockMvc.perform(post("/books")
-                        .content(jsonRequest)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isCreated())
-                .andReturn();
+            String jsonRequest = objectMapper.writeValueAsString(requestDto);
 
-        BookDto resultDto = objectMapper.readValue(result.getResponse().getContentAsString(), BookDto.class);
+            MvcResult result = mockMvc.perform(post("/books")
+                            .content(jsonRequest)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isCreated())
+                    .andReturn();
 
-        Long createdBookId = resultDto.getId();
+            BookDto resultDto = objectMapper.readValue(
+                    result.getResponse().getContentAsString(), BookDto.class);
 
-        BookDto expectedDto = createExpectedBookDto(createdBookId);
-
-        verifyBookDtoEquality(expectedDto, resultDto);
-    }
+            verifyBookDtoEquality(expectedDto, resultDto);
+        }
 
     @Test
     @DisplayName("Create book with invalid data")
@@ -155,16 +135,7 @@ public class BookControllerTest {
     void updateBook_InvalidId_ShouldReturnNotFound() throws Exception {
         Long invalidId = 999L;
 
-        CreateBookRequestDto requestDto = new CreateBookRequestDto()
-                .setTitle("Book")
-                .setAuthor("Author")
-                .setIsbn("978-1234567890")
-                .setPrice(new BigDecimal("10.00"))
-                .setCategories(Set.of(1L));
-
-        when(bookService.updateBook(eq(invalidId), eq(requestDto)))
-                .thenThrow(new EntityNotFoundException("Book not found by id " + invalidId));
-
+        CreateBookRequestDto requestDto = creatBookRequestDto();
         String jsonRequest = objectMapper.writeValueAsString(requestDto);
 
         MvcResult result = mockMvc.perform(put("/books/{id}", invalidId)
@@ -174,7 +145,9 @@ public class BookControllerTest {
                 .andReturn();
 
         String responseContent = result.getResponse().getContentAsString();
+
         assertTrue(responseContent.contains("Book not found by id " + invalidId));
+
     }
 
     @Test
@@ -215,8 +188,9 @@ public class BookControllerTest {
         BookDto resultDto = objectMapper.readValue(
                 result.getResponse().getContentAsString(), BookDto.class);
 
-        verifyBookDtoEquality(expectedDto, resultDto);
+        verifyBookDtoEquality (expectedDto, resultDto);
     }
+
 
     @Test
     @DisplayName("Get book with invalid ID")
@@ -237,13 +211,8 @@ public class BookControllerTest {
         assertEquals(expected.getIsbn(), actual.getIsbn());
         assertEquals(expected.getDescription(), actual.getDescription());
         assertEquals(expected.getCoverImage(), actual.getCoverImage());
-        assertEquals(0, expected.getPrice().compareTo(actual.getPrice()), "Prices should be equal ignoring scale");
-
-        assertEquals(
-                new HashSet<>(expected.getCategoriesIds()),
-                new HashSet<>(actual.getCategoriesIds()),
-                "Category IDs should match regardless of order"
-        );
+        assertEquals(expected.getPrice(), actual.getPrice());
+        assertEquals(expected.getCategoriesIds(), actual.getCategoriesIds());
     }
 
     @AfterEach
@@ -261,7 +230,7 @@ public class BookControllerTest {
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(true);
             ScriptUtils.executeSqlScript(connection,
-                    new ClassPathResource(BookControllerTest.REMOVE_ALL_SCRIPT_PATH));
+                    new ClassPathResource(REMOVE_ALL_SCRIPT_PATH));
         }
     }
 }
