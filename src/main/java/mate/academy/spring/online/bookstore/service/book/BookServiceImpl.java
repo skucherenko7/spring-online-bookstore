@@ -32,8 +32,9 @@ public class BookServiceImpl implements BookService {
                 .filter(categoryRepository::existsById)
                 .toList();
         if (listCategories.isEmpty()) {
-            throw new EntityNotFoundException("There categories are not exist "
+            throw new EntityNotFoundException("Categories do not exist: "
                     + requestDto.getCategories());
+
         }
         Book book = bookRepository.save(bookMapper.toModel(requestDto));
         return bookMapper.toDto(book);
@@ -62,6 +63,16 @@ public class BookServiceImpl implements BookService {
     public BookDto updateBook(Long id, CreateBookRequestDto requestDto) {
         Book bookFetched = bookRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Book not found by id " + id));
+
+        List<Long> existingCategories = requestDto.getCategories().stream()
+                .filter(categoryRepository::existsById)
+                .toList();
+
+        if (existingCategories.isEmpty()) {
+            throw new EntityNotFoundException("Provided categories do not exist: "
+                    + requestDto.getCategories());
+        }
+
         bookMapper.updateBookFromDto(requestDto, bookFetched);
         return bookMapper.toDto(bookRepository.save(bookFetched));
     }
@@ -72,4 +83,5 @@ public class BookServiceImpl implements BookService {
         return bookRepository.findAll(bookSpecification, pageable)
                 .map(bookMapper::toDto);
     }
+
 }

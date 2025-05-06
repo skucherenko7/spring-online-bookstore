@@ -13,5 +13,6 @@ public interface CategoryMapper {
 
     Category toModel(CreateCategoryRequestDto requestDto);
 
-    void updateBookFromDto(@MappingTarget Category category, CreateCategoryRequestDto requestDto);
+    void updateCategoryFromDto(@MappingTarget Category category,
+                               CreateCategoryRequestDto requestDto);
 }
