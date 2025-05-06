@@ -32,8 +32,9 @@ public class BookServiceImpl implements BookService {
                 .filter(categoryRepository::existsById)
                 .toList();
         if (listCategories.isEmpty()) {
-            throw new EntityNotFoundException("There categories are not exist "
+            throw new EntityNotFoundException("Categories do not exist: "
                     + requestDto.getCategories());
+
         }
         Book book = bookRepository.save(bookMapper.toModel(requestDto));
         return bookMapper.toDto(book);
@@ -55,9 +56,6 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public void deleteBookById(Long id) {
-        if (!bookRepository.existsById(id)) {
-            throw new EntityNotFoundException("Can't delete book by id " + id);
-        }
         bookRepository.deleteById(id);
     }
 

@@ -28,7 +28,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ExtendWith(SpringExtension.class)
 public class BookControllerTest {private static final String INSERT_BOOKS_SCRIPT_PATH =
         "database/books/insert-books-with-categories-to-test-db.sql";
     private static final String INSERT_CATEGORIES_SCRIPT_PATH =
@@ -62,6 +61,24 @@ public class BookControllerTest {private static final String INSERT_BOOKS_SCRIPT
         }
     }
 
+    @SneakyThrows
+    static void teardown(DataSource dataSource) {
+        try (Connection connection = dataSource.getConnection()) {
+            connection.setAutoCommit(true);
+            ScriptUtils.executeSqlScript(connection,
+                    new ClassPathResource(REMOVE_ALL_SCRIPT_PATH));
+        }
+    }
+
+    @AfterEach
+    void tearDown(@Autowired DataSource dataSource) {
+        teardown(dataSource);
+    }
+
+    @AfterAll
+    static void afterAll(@Autowired DataSource dataSource) {
+        teardown(dataSource);
+    }
         @Test
         @DisplayName("Create book with valid data")
         @WithMockUser(username = "admin", roles = {"ADMIN"})
@@ -165,12 +182,12 @@ public class BookControllerTest {private static final String INSERT_BOOKS_SCRIPT
     @Test
     @DisplayName("Delete book with invalid ID")
     @WithMockUser(username = "admin", roles = {"ADMIN"})
-    void deleteBook_InvalidId_ShouldReturnNotFound() throws Exception {
+    void deleteBook_InvalidId_ShouldReturnNoContent() throws Exception {
         Long invalidId = 999L;
 
         mockMvc.perform(delete("/books/{id}", invalidId)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNoContent());
     }
 
     @Test
@@ -215,22 +232,4 @@ public class BookControllerTest {private static final String INSERT_BOOKS_SCRIPT
         assertEquals(expected.getCategoriesIds(), actual.getCategoriesIds());
     }
 
-    @AfterEach
-    void tearDown(@Autowired DataSource dataSource) {
-        teardown(dataSource);
-    }
-
-    @AfterAll
-    static void afterAll(@Autowired DataSource dataSource) {
-        teardown(dataSource);
-    }
-
-    @SneakyThrows
-    static void teardown(DataSource dataSource) {
-        try (Connection connection = dataSource.getConnection()) {
-            connection.setAutoCommit(true);
-            ScriptUtils.executeSqlScript(connection,
-                    new ClassPathResource(REMOVE_ALL_SCRIPT_PATH));
-        }
-    }
 }

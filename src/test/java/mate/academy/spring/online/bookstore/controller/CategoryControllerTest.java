@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
 import mate.academy.spring.online.bookstore.dto.book.BookDtoWithoutCategoryIds;
 import mate.academy.spring.online.bookstore.dto.category.CategoryDto;
 import mate.academy.spring.online.bookstore.dto.category.CreateCategoryRequestDto;
@@ -53,6 +54,25 @@ class CategoryControllerTest {
             ScriptUtils.executeSqlScript(connection, new ClassPathResource(INSERT_CATEGORIES_SCRIPT_PATH));
             ScriptUtils.executeSqlScript(connection, new ClassPathResource(INSERT_BOOKS_SCRIPT_PATH));
         }
+    }
+
+    @AfterEach
+    void tearDown(@Autowired DataSource dataSource) {
+        teardown(dataSource);
+    }
+
+    @SneakyThrows
+    static void teardown(DataSource dataSource) {
+        try (Connection connection = dataSource.getConnection()) {
+            connection.setAutoCommit(true);
+            ScriptUtils.executeSqlScript(connection,
+                    new ClassPathResource(REMOVE_ALL_SCRIPT_PATH));
+        }
+    }
+
+    @AfterAll
+    static void afterAll(@Autowired DataSource dataSource) {
+        teardown(dataSource);
     }
 
     @Test
@@ -164,7 +184,7 @@ class CategoryControllerTest {
         BookDtoWithoutCategoryIds[] books = objectMapper.readValue(jsonResponse, BookDtoWithoutCategoryIds[].class);
 
         assertNotNull(books);
-        assertTrue(books.length > 0, "At least one book per category is expected");
+        assertEquals(1, books.length, "Expected 1 books in category with ID 2");
 
         for (BookDtoWithoutCategoryIds book : books) {
             assertNotNull(book.title(), "The title of book cann’t be null");
@@ -226,24 +246,5 @@ class CategoryControllerTest {
         assertEquals(expected.id(), actual.id(), "Category ID does not match.");
         assertEquals(expected.name(), actual.name(), "The category name doesn’t match.");
         assertEquals(expected.description(), actual.description(), "Category description doesn’t match.");
-    }
-
-    @AfterEach
-    void tearDown(@Autowired DataSource dataSource) {
-        teardown(dataSource);
-    }
-
-    static void teardown(DataSource dataSource) {
-        try (Connection connection = dataSource.getConnection()) {
-            ScriptUtils.executeSqlScript(connection, new ClassPathResource(REMOVE_ALL_SCRIPT_PATH));
-        } catch (SQLException e) {
-            System.err.println("Error clearing test data: " + e.getMessage());
-            throw new RuntimeException("Failed to clear test data", e);
-        }
-    }
-
-    @AfterAll
-    static void afterAll(@Autowired DataSource dataSource) {
-        teardown(dataSource);
     }
 }

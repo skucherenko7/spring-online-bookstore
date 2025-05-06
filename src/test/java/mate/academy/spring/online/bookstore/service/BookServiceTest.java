@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.Set;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -97,9 +98,16 @@ public class BookServiceTest {
 
         when(categoryRepository.existsById(nonExistingCategoryId)).thenReturn(false);
 
-        assertThrows(EntityNotFoundException.class, () -> bookService.saveBook(requestDto));
-    }
+        EntityNotFoundException exception = assertThrows(
+                EntityNotFoundException.class,
+                () -> bookService.saveBook(requestDto)
+        );
 
+        assertEquals(
+                "Categories do not exist: [99]",
+                exception.getMessage()
+        );
+    }
 
     @Test
     @DisplayName("Save book with empty categories should throw EntityNotFoundException")
@@ -158,7 +166,7 @@ public class BookServiceTest {
     void deleteBookById_ShouldDelete() {
         Long id = 1L;
 
-        when(bookRepository.existsById(id)).thenReturn(true);
+        lenient().when(bookRepository.existsById(id)).thenReturn(true);
         doNothing().when(bookRepository).deleteById(id);
 
         bookService.deleteBookById(id);
