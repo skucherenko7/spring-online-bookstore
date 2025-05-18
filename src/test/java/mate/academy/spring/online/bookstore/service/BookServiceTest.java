@@ -58,7 +58,7 @@ public class BookServiceTest {
                 .setPrice(BigDecimal.valueOf(240.00))
                 .setDescription("Updated description")
                 .setCoverImage("https://example.com/updated-cover-image.jpg")
-                .setCategories(Set.of(2L));
+                .setCategories(Set.of(1L));
 
         Book book = new Book()
                 .setTitle(requestDto.getTitle())
@@ -73,7 +73,7 @@ public class BookServiceTest {
                 .setTitle(book.getTitle())
                 .setAuthor(book.getAuthor());
 
-        when(categoryRepository.existsById(2L)).thenReturn(true);
+        when(categoryRepository.existsById(1L)).thenReturn(true);
         when(bookMapper.toModel(requestDto)).thenReturn(book);
         when(bookRepository.save(book)).thenReturn(book);
         when(bookMapper.toDto(book)).thenReturn(bookDto);

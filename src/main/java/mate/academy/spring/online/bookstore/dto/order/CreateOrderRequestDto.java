@@ -7,4 +7,11 @@ import lombok.Data;
 public class CreateOrderRequestDto {
     @NotBlank(message = "Shipping Address is required!")
     private String shippingAddress;
+
+    public CreateOrderRequestDto() {
+    }
+
+    public CreateOrderRequestDto(String shippingAddress) {
+        this.shippingAddress = shippingAddress;
+    }
 }

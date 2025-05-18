@@ -27,7 +27,7 @@ public class BookUtil {
         requestDto.setPrice(BigDecimal.valueOf(350.00));
         requestDto.setDescription("Women’s novels");
         requestDto.setCoverImage("Updated description");
-        requestDto.setCategories(Set.of(7L));
+        requestDto.setCategories(Set.of(5L));
 
         return requestDto;
     }
@@ -80,7 +80,7 @@ public class BookUtil {
         String testIsbn = "978-1234567989";
         String testDescription = "Updated description";
         String testCoverImage = "https://example.com/updated-cover-image.jpg";
-        List<Long> testCategoryIds = List.of(5L, 7L);
+        List<Long> testCategoryIds = List.of(3L, 5L);
         BigDecimal testPrice = new BigDecimal("520.00");
 
         BookDto expectedDto = new BookDto();
@@ -102,7 +102,7 @@ public class BookUtil {
         requestDto.setIsbn("978-1234563662");
         requestDto.setDescription("Women’s novels");
         requestDto.setCoverImage("https://example.com/updated-cover-image.jpg");
-        requestDto.setCategories(Set.of(2L));
+        requestDto.setCategories(Set.of(1L));
         requestDto.setPrice(BigDecimal.valueOf(1500.00));
         return requestDto;
     }
@@ -113,7 +113,7 @@ public class BookUtil {
         String isbn = "978-1234563662";
         String description = "Women’s novels";
         String coverImage = "https://example.com/updated-cover-image.jpg";
-        List<Long> categoryIds = List.of(2L);
+        List<Long> categoryIds = List.of(1L);
         BigDecimal price = BigDecimal.valueOf(1500.00);
 
         BookDto expectedDto = new BookDto();
