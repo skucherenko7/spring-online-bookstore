@@ -37,19 +37,29 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderResponseDto save(User user, CreateOrderRequestDto createOrderRequestDto) {
-        ShoppingCart shoppingCart = shoppingCartRepository.findByUserId(user.getId());
+        // Отримуємо кошик користувача
+        ShoppingCart shoppingCart = shoppingCartRepository.findByUser_Id(user.getId());
 
+        // Перевіряємо, чи кошик порожній
         if (shoppingCart == null || shoppingCart.getCartItems().isEmpty()) {
             throw new OrderProcessingException("Shoppingcart is empty! You can't place an order.",
                     new Exception("Empty cart"));
         }
 
+        // Створюємо нове замовлення
         Order order = createOrder(user, createOrderRequestDto);
         order.setTotal(calculateTotal(shoppingCart));
         List<OrderItem> orderItems = createOrderItems(order, shoppingCart);
         order.setOrderItems(new HashSet<>(orderItems));
+
+        // Зберігаємо замовлення
         orderRepository.save(order);
+
+        // Очищаємо кошик та зберігаємо зміни в ньому
         shoppingCart.clear();
+        shoppingCartRepository.save(shoppingCart); // Додано збереження кошика
+
+        // Повертаємо DTO замовлення
         return orderMapper.toDto(order);
     }
 

@@ -208,6 +208,37 @@ public class BookControllerTest {private static final String INSERT_BOOKS_SCRIPT
         verifyBookDtoEquality (expectedDto, resultDto);
     }
 
+    @Test
+    @DisplayName("Search books by parameters")
+    @WithMockUser(username = "user", roles = {"USER"})
+    void searchBooks_ShouldReturnFilteredBooks() throws Exception {
+        MvcResult result = mockMvc.perform(get("/books/search")
+                        .param("title", "Seven Husbands of Evelyn Hugo") // або інші значення параметрів
+                        .param("author", "Taylor Jenkins Reid")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String response = result.getResponse().getContentAsString();
+
+        assertTrue(response.contains("Seven Husbands of Evelyn Hugo")); // перевірка наявності
+    }
+
+    @Test
+    @DisplayName("Get all books paginated")
+    @WithMockUser(username = "user", roles = {"USER"})
+    void getAllBooks_ShouldReturnPagedBooks() throws Exception {
+        MvcResult result = mockMvc.perform(get("/books")
+                        .param("page", "0")
+                        .param("size", "5")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String response = result.getResponse().getContentAsString();
+
+        assertTrue(response.contains("content")); // перевірка, що повертається сторінка
+    }
 
     @Test
     @DisplayName("Get book with invalid ID")

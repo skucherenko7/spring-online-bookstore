@@ -157,14 +157,22 @@ class CategoryControllerTest {
     @DisplayName("Get category by valid id")
     @WithMockUser(username = "user", roles = {"USER"})
     void getCategoryById_ValidId_ShouldReturnCategoryDto() throws Exception {
-        CategoryDto expectedDto = expectedCategoryResponseDto();
+        // Ми явно вказуємо категорію з ID 1, яка є у твоєму SQL-скрипті
+        CategoryDto expectedDto = new CategoryDto(
+                1L,
+                "Poetry",
+                "Poetry books"
+        );
 
         MvcResult result = mockMvc.perform(get("/categories/{id}", expectedDto.id())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        CategoryDto resultDto = objectMapper.readValue(result.getResponse().getContentAsString(), CategoryDto.class);
+        CategoryDto resultDto = objectMapper.readValue(
+                result.getResponse().getContentAsString(),
+                CategoryDto.class
+        );
 
         verifyCategoryDto(expectedDto, resultDto);
     }
@@ -173,7 +181,7 @@ class CategoryControllerTest {
     @DisplayName("Get books by category ID")
     @WithMockUser(username = "user", roles = {"USER"})
     void getBooksByCategoryId_ValidId_ShouldReturnListOfBooks() throws Exception {
-        Long categoryId = 2L;
+        Long categoryId = 1L;
 
         MvcResult result = mockMvc.perform(get("/categories/{id}/books", categoryId)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -184,7 +192,7 @@ class CategoryControllerTest {
         BookDtoWithoutCategoryIds[] books = objectMapper.readValue(jsonResponse, BookDtoWithoutCategoryIds[].class);
 
         assertNotNull(books);
-        assertEquals(1, books.length, "Expected 1 books in category with ID 2");
+        assertEquals(1, books.length, "Expected 1 books in category with ID 1");
 
         for (BookDtoWithoutCategoryIds book : books) {
             assertNotNull(book.title(), "The title of book cann’t be null");
@@ -195,7 +203,7 @@ class CategoryControllerTest {
     @Test
     @DisplayName("Get all categories with pagination")
     @WithMockUser(username = "user", roles = {"USER"})
-    void getAllCategories_ShouldReturnPagedCategoryDtos() throws Exception {
+    void getAllCategories_ShouldReturnPagedCategoryDto() throws Exception {
         MvcResult result = mockMvc.perform(get("/categories")
                         .param("page", "0")
                         .param("size", "10")
