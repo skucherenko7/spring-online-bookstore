@@ -1,5 +1,20 @@
 package mate.academy.spring.online.bookstore.service;
 
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import mate.academy.spring.online.bookstore.dto.book.BookDto;
 import mate.academy.spring.online.bookstore.dto.book.BookSearchParametersDto;
 import mate.academy.spring.online.bookstore.dto.book.CreateBookRequestDto;
@@ -21,14 +36,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.junit.Assert.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class BookServiceTest {
@@ -46,7 +53,6 @@ public class BookServiceTest {
 
     @InjectMocks
     private BookServiceImpl bookService;
-
 
     @Test
     @DisplayName("Save book with valid categories should return BookDto")

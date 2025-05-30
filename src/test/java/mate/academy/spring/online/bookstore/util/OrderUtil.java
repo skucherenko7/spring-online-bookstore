@@ -1,20 +1,23 @@
-package mate.academy.spring.online.bookstore.example;
+package mate.academy.spring.online.bookstore.util;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
 import mate.academy.spring.online.bookstore.dto.order.CreateOrderRequestDto;
 import mate.academy.spring.online.bookstore.dto.order.OrderResponseDto;
 import mate.academy.spring.online.bookstore.dto.order.UpdateOrderStatusRequestDto;
 import mate.academy.spring.online.bookstore.dto.orderitem.OrderItemResponseDto;
 import mate.academy.spring.online.bookstore.model.Order;
 import mate.academy.spring.online.bookstore.model.Order.Status;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Set;
 
 public class OrderUtil {
 
-    public static OrderResponseDto getOrderResponseDto(Long orderId, Long userId, Set<OrderItemResponseDto> items, BigDecimal total, String status) {
+    public static OrderResponseDto getOrderResponseDto(Long orderId, Long userId,
+                                                       Set<OrderItemResponseDto> items,
+                                                       BigDecimal total,
+                                                       String status) {
         return new OrderResponseDto(
                 orderId,
                 userId,
@@ -27,8 +30,8 @@ public class OrderUtil {
 
     public static OrderResponseDto getSampleOrderResponseDto() {
         Set<OrderItemResponseDto> items = Set.of(
-                getOrderItemResponseDto(1L, 101L, 2),  // Перший товар
-                getOrderItemResponseDto(2L, 102L, 1)   // Другий товар
+                getOrderItemResponseDto(1L, 101L, 2),
+                getOrderItemResponseDto(2L, 102L, 1)
         );
 
         return getOrderResponseDto(1L, 1L, items, BigDecimal.valueOf(80.00), "PENDING");
@@ -76,11 +79,11 @@ public class OrderUtil {
     }
 
     public static OrderResponseDto getNewOrderResponseDto() {
-        OrderItemResponseDto orderItemResponseDto = new OrderItemResponseDto(4L, 1L, 20);
 
+        OrderItemResponseDto orderItemResponseDto = new OrderItemResponseDto(4L, 1L, 20);
         return new OrderResponseDto(
-                4L,  //
-                1L,  //
+                4L,
+                1L,
                 Set.of(orderItemResponseDto),
                 LocalDateTime.now(),
                 BigDecimal.valueOf(3000),

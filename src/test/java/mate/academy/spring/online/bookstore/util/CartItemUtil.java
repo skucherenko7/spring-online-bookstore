@@ -1,4 +1,6 @@
-package mate.academy.spring.online.bookstore.example;
+package mate.academy.spring.online.bookstore.util;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import mate.academy.spring.online.bookstore.dto.cartitem.CartItemRequestDto;
 import mate.academy.spring.online.bookstore.dto.cartitem.CartItemResponseDto;
@@ -6,15 +8,14 @@ import mate.academy.spring.online.bookstore.model.Book;
 import mate.academy.spring.online.bookstore.model.CartItem;
 import mate.academy.spring.online.bookstore.model.ShoppingCart;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 public class CartItemUtil {
 
     public static CartItemRequestDto createCartItemRequestDto() {
         return new CartItemRequestDto(7L, 2);
     }
 
-    public static CartItem createCartItem(CartItemRequestDto requestDto, ShoppingCart cart, Book book) {
+    public static CartItem createCartItem(CartItemRequestDto requestDto,
+                                          ShoppingCart cart, Book book) {
         CartItem cartItem = new CartItem();
         cartItem.setId(1L);
         cartItem.setBook(book);
@@ -31,7 +32,8 @@ public class CartItemUtil {
         );
     }
 
-    public static void verifyCartItemResponseDto(CartItemResponseDto expected, CartItemResponseDto actual) {
+    public static void verifyCartItemResponseDto(CartItemResponseDto expected,
+                                                 CartItemResponseDto actual) {
         assertEquals(expected.id(), actual.id());
         assertEquals(expected.bookId(), actual.bookId());
         assertEquals(expected.quantity(), actual.quantity());

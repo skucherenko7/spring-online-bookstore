@@ -1,18 +1,17 @@
-package mate.academy.spring.online.bookstore.example;
+package mate.academy.spring.online.bookstore.util;
 
+import java.util.Set;
 import mate.academy.spring.online.bookstore.dto.user.UserLoginRequestDto;
 import mate.academy.spring.online.bookstore.dto.user.UserRegistrationRequestDto;
 import mate.academy.spring.online.bookstore.dto.user.UserResponseDto;
 import mate.academy.spring.online.bookstore.model.Role;
 import mate.academy.spring.online.bookstore.model.User;
 
-import java.util.Set;
-
 public class UserUtil {
     public static User getUser() {
         User user = new User();
         user.setId(1L);
-        user.setEmail("user111@example.com");
+        user.setEmail("user111@util.com");
         user.setPassword("Password111");
         user.setFirstName("User111");
         user.setLastName("User111");
@@ -25,7 +24,7 @@ public class UserUtil {
     public static User getUserWithHashedPassword() {
         User user = new User();
         user.setId(1L);
-        user.setEmail("juser111@example.com");
+        user.setEmail("juser111@util.com");
         user.setPassword("$2a$10$WlHqEbjYKo0FKQUYC1ppUOGaDj7dRW6USZ7gIzt9UXkajr4X2wXC2");
         user.setFirstName("User111");
         user.setLastName("User111");
@@ -52,7 +51,7 @@ public class UserUtil {
     public static User getAdmin() {
         User user = new User();
         user.setId(2L);
-        user.setEmail("admin@example.com");
+        user.setEmail("admin@util.com");
         user.setPassword("Password999");
         user.setFirstName("Admin");
         user.setLastName("Admin");
@@ -111,6 +110,6 @@ public class UserUtil {
     }
 
     public static UserLoginRequestDto getUserLoginRequestDto() {
-        return new UserLoginRequestDto("user111@example.com", "Password111");
+        return new UserLoginRequestDto("user111@util.com", "Password111");
     }
 }

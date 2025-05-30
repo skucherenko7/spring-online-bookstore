@@ -1,5 +1,12 @@
 package mate.academy.spring.online.bookstore.repository;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Optional;
+import javax.sql.DataSource;
 import mate.academy.spring.online.bookstore.model.Order;
 import mate.academy.spring.online.bookstore.model.User;
 import mate.academy.spring.online.bookstore.repository.order.OrderRepository;
@@ -14,13 +21,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
-
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)

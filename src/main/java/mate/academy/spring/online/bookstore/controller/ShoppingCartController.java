@@ -10,6 +10,7 @@ import mate.academy.spring.online.bookstore.dto.cartitem.UpdateCartItemRequestDt
 import mate.academy.spring.online.bookstore.dto.shoppingcart.ShoppingCartDto;
 import mate.academy.spring.online.bookstore.service.shoppingcart.ShoppingCartService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,12 +37,11 @@ public class ShoppingCartController {
                 .getShoppingCartByUserId(authentication);
     }
 
-    @PostMapping
+    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Add a book", description = "Add book to the shopping cart")
     public ShoppingCartDto save(@RequestBody @Valid CartItemRequestDto requestDto,
                                 Authentication authentication) {
-        return shoppingCartService
-                .addCartItem(requestDto, authentication);
+        return shoppingCartService.addCartItem(requestDto, authentication);
     }
 
     @PutMapping("/items/{id}")

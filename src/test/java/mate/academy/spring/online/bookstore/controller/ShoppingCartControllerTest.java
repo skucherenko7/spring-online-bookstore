@@ -1,114 +1,119 @@
 package mate.academy.spring.online.bookstore.controller;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Set;
 import mate.academy.spring.online.bookstore.dto.cartitem.CartItemDto;
 import mate.academy.spring.online.bookstore.dto.cartitem.CartItemRequestDto;
 import mate.academy.spring.online.bookstore.dto.cartitem.UpdateCartItemRequestDto;
 import mate.academy.spring.online.bookstore.dto.shoppingcart.ShoppingCartDto;
-import mate.academy.spring.online.bookstore.exception.BookNotFoundException;
-import mate.academy.spring.online.bookstore.exception.CustomGlobalExceptionHandler;
-import mate.academy.spring.online.bookstore.model.Book;
-import mate.academy.spring.online.bookstore.repository.book.BookRepository;
-import mate.academy.spring.online.bookstore.service.shoppingcart.ShoppingCartService;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import java.util.Optional;
-import java.util.Set;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import org.springframework.test.web.servlet.MvcResult;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureMockMvc
 class ShoppingCartControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
 
     @Autowired
     private ObjectMapper objectMapper;
 
-    @InjectMocks
-    private ShoppingCartController shoppingCartController;
+    @Test
+    @DisplayName("Add book to the shopping cart")
+    @WithMockUser(username = "user", roles = "USER")
+    @Sql(scripts = {
+            "/database/delete-all-data-db.sql",
+            "/database/shoppingcarts/insert-test-data.sql"
+    }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void save_shouldAddCartItem_integration() throws Exception {
+        CartItemRequestDto requestDto = new CartItemRequestDto(1L, 2);
+        String jsonRequest = objectMapper.writeValueAsString(requestDto);
 
-    @Mock
-    private ShoppingCartService shoppingCartService;
+        MvcResult result = mockMvc.perform(post("/cart")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(jsonRequest))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn();
 
-    @Mock
-    private BookRepository bookRepository;
+        String jsonResponse = result.getResponse().getContentAsString();
 
-    private MockMvc mockMvc;
+        Set<CartItemDto> cartItems = Set.of(
+                new CartItemDto(1L, 1, "Seven Husbands of Evelyn Hugo", 2)
+        );
+        ShoppingCartDto expectedDto = new ShoppingCartDto(1L, 1L, cartItems);
 
-    @BeforeEach
-    void setUp() {
-        mockMvc = MockMvcBuilders
-                .standaloneSetup(shoppingCartController)
-                .setControllerAdvice(new CustomGlobalExceptionHandler())
-                .build();
-    }
+        ShoppingCartDto actualDto = objectMapper.readValue(jsonResponse, ShoppingCartDto.class);
 
-    private ShoppingCartDto stubShoppingCartDto() {
-        CartItemDto cartItemDto = new CartItemDto(1L, 12, "Son", 2);
-        Set<CartItemDto> cartItems = Set.of(cartItemDto);
-        return new ShoppingCartDto(1L, 1L, cartItems);
+        assertEquals(expectedDto, actualDto);
     }
 
     @Test
+    @DisplayName("Get the shopping cart")
     @WithMockUser(username = "user", roles = "USER")
+    @Sql(scripts = {
+            "/database/delete-all-data-db.sql",
+            "/database/shoppingcarts/insert-cartitems-to-shoppingcart-test.sql"
+    }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     void getShoppingCartByUser_shouldReturnCart() throws Exception {
         mockMvc.perform(get("/cart"))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @WithMockUser(username = "user", roles = "USER")
-    void save_shouldAddCartItem() throws Exception {
-        Book mockBook = new Book();
-        mockBook.setId(1L);
-        mockBook.setTitle("Seven Husbands of Evelyn Hugo");
-
-        Mockito.when(bookRepository.findById(1L)).thenReturn(Optional.of(mockBook));
-
-        Mockito.when(shoppingCartService.addCartItem(any(), any()))
-                .thenReturn(stubShoppingCartDto());
-
-        CartItemRequestDto requestDto = new CartItemRequestDto(1L, 2);
-
-        mockMvc.perform(post("/cart")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto)))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.userId").value(1))
+                .andExpect(jsonPath("$.cartItems[0].id").value(1))
+                .andExpect(jsonPath("$.cartItems[0].bookId").value(1))
+                .andExpect(jsonPath("$.cartItems[0].bookTitle")
+                        .value("Seven Husbands of Evelyn Hugo"))
+                .andExpect(jsonPath("$.cartItems[0].quantity").value(2));
     }
 
     @Test
+    @DisplayName("Update the cart item by id")
     @WithMockUser(username = "user", roles = "USER")
+    @Sql(scripts = {
+            "/database/delete-all-data-db.sql",
+            "/database/shoppingcarts/insert-cartitems-to-shoppingcart-test.sql"
+    }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     void update_shouldUpdateCartItem() throws Exception {
         UpdateCartItemRequestDto updateDto = new UpdateCartItemRequestDto();
         updateDto.setQuantity(5);
-
-        when(shoppingCartService.updateCartItemById(eq(1L), any(), any()))
-                .thenReturn(stubShoppingCartDto());
 
         mockMvc.perform(put("/cart/items/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateDto)))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.cartItems[0].quantity").value(5));
     }
 
     @Test
+    @DisplayName("Delete the cart item by id")
     @WithMockUser(username = "user", roles = "USER")
-    void delete_shouldThrowException() throws Exception {
-        doThrow(new BookNotFoundException("Book not found")).when(shoppingCartService).deleteCartItemById(1L);
-
-        mockMvc.perform(delete("/cart/items/{id}", 1L))
-                .andExpect(status().isNotFound());  // Очікуємо статус 404, якщо книга не знайдена
+    @Sql(scripts = {
+            "/database/delete-all-data-db.sql",
+            "/database/shoppingcarts/insert-cartitems-to-shoppingcart-test.sql"
+    }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    void delete_shouldRemoveCartItem() throws Exception {
+        mockMvc.perform(delete("/cart/items/1"))
+                .andExpect(status().isNoContent());
     }
 }

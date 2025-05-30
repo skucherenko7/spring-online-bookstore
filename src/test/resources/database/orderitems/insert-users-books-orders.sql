@@ -1,5 +1,5 @@
 INSERT INTO users (id, email, password, first_name, last_name, shipping_address, is_deleted)
-VALUES (1, 'user111@example.com', 'Password111', 'User111', 'User111', '145 Main St, City, Country', false);
+VALUES (1, 'user111@util.com', 'Password111', 'User111', 'User111', '145 Main St, City, Country', false);
 
 INSERT INTO books (id, title, author, isbn, price, description, cover_image, is_deleted)
 VALUES

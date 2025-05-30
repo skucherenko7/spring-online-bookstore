@@ -1,20 +1,23 @@
 package mate.academy.spring.online.bookstore.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import mate.academy.spring.online.bookstore.dto.user.UserLoginRequestDto;
 import mate.academy.spring.online.bookstore.dto.user.UserLoginResponseDto;
-import mate.academy.spring.online.bookstore.exception.CustomGlobalExceptionHandler;
-import mate.academy.spring.online.bookstore.security.AuthenticationService;
-import org.springframework.http.MediaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import mate.academy.spring.online.bookstore.dto.user.UserRegistrationRequestDto;
 import mate.academy.spring.online.bookstore.dto.user.UserResponseDto;
-import mate.academy.spring.online.bookstore.example.UserUtil;
+import mate.academy.spring.online.bookstore.exception.CustomGlobalExceptionHandler;
 import mate.academy.spring.online.bookstore.exception.RegistrationException;
+import mate.academy.spring.online.bookstore.security.AuthenticationService;
 import mate.academy.spring.online.bookstore.service.user.UserService;
+import mate.academy.spring.online.bookstore.util.UserUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +25,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -57,7 +61,8 @@ class AuthenticationControllerTest {
 
     @Test
     void registerUser_ShouldReturnUserResponseDto_WhenValidRequest() throws Exception {
-        ArgumentCaptor<UserRegistrationRequestDto> captor = ArgumentCaptor.forClass(UserRegistrationRequestDto.class);
+        ArgumentCaptor<UserRegistrationRequestDto> captor = ArgumentCaptor
+                .forClass(UserRegistrationRequestDto.class);
         when(userService.register(captor.capture())).thenReturn(userResponseDto);
 
         mockMvc.perform(post("/auth/registration")
@@ -68,7 +73,8 @@ class AuthenticationControllerTest {
                 .andExpect(jsonPath("$.email").value(userResponseDto.getEmail()))
                 .andExpect(jsonPath("$.firstName").value(userResponseDto.getFirstName()))
                 .andExpect(jsonPath("$.lastName").value(userResponseDto.getLastName()))
-                .andExpect(jsonPath("$.shippingAddress").value(userResponseDto.getShippingAddress()));
+                .andExpect(jsonPath("$.shippingAddress")
+                        .value(userResponseDto.getShippingAddress()));
 
         assertEquals(userRegistrationRequestDto.getEmail(), captor.getValue().getEmail());
         verify(userService).register(any(UserRegistrationRequestDto.class));

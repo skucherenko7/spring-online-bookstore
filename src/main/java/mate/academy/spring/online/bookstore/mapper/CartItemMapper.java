@@ -13,7 +13,6 @@ public interface CartItemMapper {
     @Mapping(source = "book.title", target = "bookTitle")
     CartItemDto toDto(CartItem item);
 
-    // Тепер маппер працює безпосередньо з DTO і об'єктами
     @Mapping(target = "book", source = "bookId", qualifiedByName = "bookById")
     CartItem toModel(CartItemRequestDto requestDto);
 }

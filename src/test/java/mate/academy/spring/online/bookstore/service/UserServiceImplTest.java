@@ -1,24 +1,28 @@
 package mate.academy.spring.online.bookstore.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import mate.academy.spring.online.bookstore.dto.user.UserRegistrationRequestDto;
 import mate.academy.spring.online.bookstore.dto.user.UserResponseDto;
 import mate.academy.spring.online.bookstore.exception.RegistrationException;
-import mate.academy.spring.online.bookstore.example.UserUtil;
 import mate.academy.spring.online.bookstore.mapper.UserMapper;
 import mate.academy.spring.online.bookstore.model.Role;
 import mate.academy.spring.online.bookstore.model.User;
 import mate.academy.spring.online.bookstore.repository.role.RoleRepository;
 import mate.academy.spring.online.bookstore.repository.user.UserRepository;
 import mate.academy.spring.online.bookstore.service.shoppingcart.ShoppingCartService;
-
 import mate.academy.spring.online.bookstore.service.user.UserServiceImpl;
+import mate.academy.spring.online.bookstore.util.UserUtil;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -61,8 +65,8 @@ class UserServiceImplTest {
     }
 
     @Test
+    @DisplayName("Should return UserResponseDto when registration request is valid")
     void register_ShouldReturnUserResponseDto_WhenValidRequest() throws RegistrationException {
-        // Arrange
         when(userRepository.existsByEmail(requestDto.getEmail())).thenReturn(false);
         when(userMapper.requestDtoToUser(requestDto)).thenReturn(userBeforeSave);
         when(passwordEncoder.encode("12345678")).thenReturn("hashed_password");
@@ -84,6 +88,7 @@ class UserServiceImplTest {
     }
 
     @Test
+    @DisplayName("Should throw RegistrationException when email already exists")
     void register_ShouldThrowRegistrationException_WhenEmailAlreadyExists() {
         when(userRepository.existsByEmail(requestDto.getEmail())).thenReturn(true);
 

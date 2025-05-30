@@ -1,21 +1,40 @@
 package mate.academy.spring.online.bookstore.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
+import javax.sql.DataSource;
 import lombok.SneakyThrows;
 import mate.academy.spring.online.bookstore.dto.order.CreateOrderRequestDto;
 import mate.academy.spring.online.bookstore.dto.order.OrderResponseDto;
-import mate.academy.spring.online.bookstore.dto.orderitem.OrderItemResponseDto;
 import mate.academy.spring.online.bookstore.dto.order.UpdateOrderStatusRequestDto;
+import mate.academy.spring.online.bookstore.dto.orderitem.OrderItemResponseDto;
 import mate.academy.spring.online.bookstore.model.Order.Status;
-import mate.academy.spring.online.bookstore.example.OrderUtil;
-import mate.academy.spring.online.bookstore.example.UserUtil;
-import org.junit.jupiter.api.*;
+import mate.academy.spring.online.bookstore.util.OrderUtil;
+import mate.academy.spring.online.bookstore.util.UserUtil;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -23,34 +42,20 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.boot.test.context.SpringBootTest;
-
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.List;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class OrderControllerTest {
 
     private static MockMvc mockMvc;
 
+    private static final String FULL_ORDER_SETUP_SQL = "database/orders/full-order-setup.sql";
+    private static final String DELETE_ALL_DATA_SQL = "database/delete-all-data-db.sql";
+
     @Autowired
     private ObjectMapper objectMapper;
 
     @Autowired
     private DataSource dataSource;
-
-    private static final String FULL_ORDER_SETUP_SQL = "database/orders/full-order-setup.sql";
-    private static final String DELETE_ALL_DATA_SQL = "database/delete-all-data-db.sql";
 
     @BeforeAll
     static void beforeAll(
@@ -87,10 +92,6 @@ public class OrderControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonRequest))
                 .andReturn();
-
-        System.out.println("STATUS: " + result.getResponse().getStatus());
-        System.out.println("RESPONSE: " + result.getResponse().getContentAsString());
-
 
         OrderResponseDto actual = objectMapper.readValue(
                 result.getResponse().getContentAsString(), OrderResponseDto.class
@@ -170,7 +171,8 @@ public class OrderControllerTest {
     void getOrderItems_NonExistingOrder_ShouldReturnNotFound() throws Exception {
         Long orderId = 999L;
         UsernamePasswordAuthenticationToken auth =
-                new UsernamePasswordAuthenticationToken(UserUtil.getUser(), null, UserUtil.getUser().getAuthorities());
+                new UsernamePasswordAuthenticationToken(UserUtil.getUser(), null,
+                        UserUtil.getUser().getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(auth);
 
         mockMvc.perform(get("/orders/{orderId}/items", orderId)
@@ -215,6 +217,7 @@ public class OrderControllerTest {
                 .andExpect(status().isNotFound())
                 .andReturn();
     }
+
     @Test
     @WithMockUser(username = "user", roles = {"USER"})
     @DisplayName("Update order status when user is not admin")

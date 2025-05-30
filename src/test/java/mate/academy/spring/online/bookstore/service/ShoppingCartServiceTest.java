@@ -1,13 +1,16 @@
 package mate.academy.spring.online.bookstore.service;
 
-import mate.academy.spring.online.bookstore.dto.cartitem.CartItemDto;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import jakarta.transaction.Transactional;
+import java.math.BigDecimal;
 import mate.academy.spring.online.bookstore.dto.cartitem.CartItemRequestDto;
 import mate.academy.spring.online.bookstore.dto.cartitem.UpdateCartItemRequestDto;
 import mate.academy.spring.online.bookstore.dto.shoppingcart.ShoppingCartDto;
-import mate.academy.spring.online.bookstore.exception.BookNotFoundException;
 import mate.academy.spring.online.bookstore.exception.EntityNotFoundException;
-import mate.academy.spring.online.bookstore.mapper.CartItemMapper;
-import mate.academy.spring.online.bookstore.mapper.ShoppingCartMapper;
 import mate.academy.spring.online.bookstore.model.Book;
 import mate.academy.spring.online.bookstore.model.CartItem;
 import mate.academy.spring.online.bookstore.model.ShoppingCart;
@@ -15,239 +18,178 @@ import mate.academy.spring.online.bookstore.model.User;
 import mate.academy.spring.online.bookstore.repository.book.BookRepository;
 import mate.academy.spring.online.bookstore.repository.cartitem.CartItemRepository;
 import mate.academy.spring.online.bookstore.repository.shoppingcart.ShoppingCartRepository;
-import mate.academy.spring.online.bookstore.service.shoppingcart.ShoppingCartServiceImpl;
+import mate.academy.spring.online.bookstore.repository.user.UserRepository;
+import mate.academy.spring.online.bookstore.service.shoppingcart.ShoppingCartService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import java.util.*;
+import org.springframework.test.context.jdbc.Sql;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
+@SpringBootTest
+@Transactional
+@Sql(scripts = "/database/delete-all-data-db.sql",
+        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 public class ShoppingCartServiceTest {
-    @InjectMocks
-    private ShoppingCartServiceImpl shoppingCartService;
-    @Mock
+
+    @Autowired
+    private ShoppingCartService shoppingCartService;
+    @Autowired
     private BookRepository bookRepository;
-    @Mock
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
     private ShoppingCartRepository shoppingCartRepository;
-    @Mock
+    @Autowired
     private CartItemRepository cartItemRepository;
-    @Mock
-    private ShoppingCartMapper shoppingCartMapper;
-    @Mock
-    private CartItemMapper cartItemMapper;
-    @Mock
-    private Authentication authentication;
 
     private User user;
+    private Book book;
     private ShoppingCart cart;
+    private Authentication authentication;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
         user = new User();
-        user.setId(1L);
-        when(authentication.getPrincipal()).thenReturn(user);
+        user.setEmail("user111@util.com");
+        user.setPassword("Password111");
+        user.setFirstName("User111");
+        user.setLastName("User111");
+        user.setShippingAddress("145 Main St, City, Country");
+        user = userRepository.save(user);
 
-        cart = new ShoppingCart();
-        cart.setId(1L);
-        cart.setUser(user);
-        cart.setCartItems(new HashSet<>());
+        book = new Book();
+        book.setTitle("Seven Husbands of Evelyn Hugo");
+        book.setAuthor("Taylor Jenkins Reid");
+        book.setIsbn("978-1234567989");
+        book.setPrice(new BigDecimal("520.00"));
+        book = bookRepository.save(book);
+
+        shoppingCartService.createNewShoppingCart(user);
+        cart = shoppingCartRepository.findByUser_Id(user.getId());
+
+        authentication = new TestingAuthenticationToken(user, null);
     }
 
     @Test
+    @DisplayName("Adding  a new book to the shoppingcart")
     void addCartItem_shouldAddNewItem() {
-        Long bookId = 10L;
-        Book book = new Book();
-        book.setId(bookId);
-
-        CartItemRequestDto requestDto = new CartItemRequestDto(bookId, 2);
-
-        when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
-        when(shoppingCartRepository.findByUser_Id(user.getId())).thenReturn(cart);
-
-        CartItem newCartItem = new CartItem();
-        newCartItem.setBook(book);
-        newCartItem.setQuantity(2);
-
-        when(cartItemMapper.toModel(requestDto)).thenReturn(newCartItem);
-
-        CartItemDto cartItemDto = new CartItemDto(1L, bookId.intValue(), "Book title", 2);
-        Set<CartItemDto> cartItemDtos = Set.of(cartItemDto);
-
-        ShoppingCartDto expectedDto = new ShoppingCartDto(1L, 1L, cartItemDtos);
-        when(shoppingCartMapper.toDto(cart)).thenReturn(expectedDto);
-
+        CartItemRequestDto requestDto = new CartItemRequestDto(book.getId(), 2);
         ShoppingCartDto result = shoppingCartService.addCartItem(requestDto, authentication);
 
-        verify(bookRepository).findById(bookId);
-        verify(cartItemMapper).toModel(requestDto);
-        verify(shoppingCartRepository).save(cart);
-        assertEquals(expectedDto, result);
+        assertNotNull(result);
+        assertEquals(1, result.cartItems().size());
+        var item = result.cartItems().iterator().next();
+        assertEquals(book.getId(), item.bookId());
+        assertEquals(2, item.quantity());
     }
 
     @Test
+    @DisplayName("Updating a quantity to the shoppingcart")
     void updateCartItemById_shouldUpdateQuantity() {
-        Long cartItemId = 5L;
+        CartItem cartItem = new CartItem();
+        cartItem.setBook(book);
+        cartItem.setQuantity(1);
+
+        cart.addItemToCart(cartItem);
+        shoppingCartRepository.saveAndFlush(cart);
+
+        cartItem = cart.getCartItems().iterator().next();
+
+        CartItem savedCartItem = cartItemRepository.findById(cartItem.getId()).orElseThrow();
+        assertEquals(1, savedCartItem.getQuantity());
+
         UpdateCartItemRequestDto updateDto = new UpdateCartItemRequestDto();
         updateDto.setQuantity(4);
 
-        CartItem cartItem = new CartItem();
-        cartItem.setId(cartItemId);
-        cartItem.setQuantity(1);
+        ShoppingCartDto result = shoppingCartService.updateCartItemById(cartItem.getId(),
+                updateDto, authentication);
 
-        when(shoppingCartRepository.findByUser_Id(user.getId())).thenReturn(cart);
-        when(cartItemRepository.findByIdAndShoppingCartId(cartItemId, cart.getId()))
-                .thenReturn(Optional.of(cartItem));
+        CartItem updatedCartItem = cartItemRepository.findById(cartItem.getId()).orElseThrow();
+        assertEquals(4, updatedCartItem.getQuantity());
 
-        ShoppingCartDto expectedDto = new ShoppingCartDto(1L, user.getId(), Set.of());
-        when(shoppingCartMapper.toDto(cart)).thenReturn(expectedDto);
-
-        ShoppingCartDto result = shoppingCartService.updateCartItemById(cartItemId, updateDto, authentication);
-
-        verify(cartItemRepository).save(cartItem);
-        assertEquals(4, cartItem.getQuantity());
-        assertEquals(expectedDto, result);
+        assertNotNull(result.cartItems(), "Cart items should not be null");
+        assertEquals(1, result.cartItems().size(), "Cart items size should be 1");
+        assertEquals(4, result.cartItems().iterator().next()
+                .quantity(), "Quantity in DTO should be updated");
     }
 
     @Test
+    @DisplayName("It’s exception if book was not found by id, when updating was been")
     void updateCartItemById_shouldThrowIfItemNotFound() {
-        Long cartItemId = 999L;
         UpdateCartItemRequestDto updateDto = new UpdateCartItemRequestDto();
         updateDto.setQuantity(3);
 
-        when(shoppingCartRepository.findByUser_Id(user.getId())).thenReturn(cart);
-        when(cartItemRepository.findByIdAndShoppingCartId(cartItemId, cart.getId()))
-                .thenReturn(Optional.empty());
-
-        EntityNotFoundException exception = assertThrows(
-                EntityNotFoundException.class,
-                () -> shoppingCartService.updateCartItemById(cartItemId, updateDto, authentication)
-        );
-
-        assertTrue(exception.getMessage().contains("Can't find cart item by id"));
+        assertThrows(EntityNotFoundException.class, () ->
+                shoppingCartService.updateCartItemById(999L, updateDto, authentication));
     }
 
     @Test
+    @DisplayName("Returnig the shoppingcard of user")
     void getShoppingCartByUserId_shouldReturnCartDto() {
-        when(shoppingCartRepository.findByUser_Id(user.getId())).thenReturn(cart);
-
-        ShoppingCartDto expectedDto = new ShoppingCartDto(cart.getId(), user.getId(), Set.of());
-        when(shoppingCartMapper.toDto(cart)).thenReturn(expectedDto);
-
         ShoppingCartDto result = shoppingCartService.getShoppingCartByUserId(authentication);
-
-        assertEquals(expectedDto, result);
+        assertEquals(user.getId(), result.userId());
     }
 
     @Test
+    @DisplayName("Deleting a shoppingcart if it’s existing")
     void deleteCartItemById_shouldDeleteIfExists() {
-        Long cartItemId = 10L;
-        when(cartItemRepository.existsById(cartItemId)).thenReturn(true);
+        CartItem cartItem = new CartItem();
+        cartItem.setBook(book);
+        cartItem.setQuantity(1);
+        cartItem.setShoppingCart(cart);
+        cartItem = cartItemRepository.save(cartItem);
 
-        shoppingCartService.deleteCartItemById(cartItemId);
+        shoppingCartService.deleteCartItemById(cartItem.getId());
 
-        verify(cartItemRepository).deleteById(cartItemId);
+        assertFalse(cartItemRepository.existsById(cartItem.getId()));
     }
 
     @Test
+    @DisplayName("Deleting a shoppingcart if it’s existing")
     void deleteCartItemById_shouldThrowIfNotExists() {
-        Long cartItemId = 20L;
-        when(cartItemRepository.existsById(cartItemId)).thenReturn(false);
-
-        EntityNotFoundException exception = assertThrows(
-                EntityNotFoundException.class,
-                () -> shoppingCartService.deleteCartItemById(cartItemId)
-        );
-
-        assertTrue(exception.getMessage().contains("Can`t find item by id"));
+        assertThrows(EntityNotFoundException.class, () ->
+                shoppingCartService.deleteCartItemById(9999L));
     }
 
     @Test
-    void createNewShoppingCart_shouldSaveNewCart() {
+    @DisplayName("Creating a new shoppingcart")
+    void createNewShoppingCart_shouldCreateForUser() {
         User newUser = new User();
-        newUser.setId(2L);
+        newUser.setEmail("newuser111@ex.com");
+        newUser.setPassword("Password111");
+        newUser.setFirstName("New");
+        newUser.setLastName("User");
+        newUser.setShippingAddress("445 Main St, City, Country");
+        newUser = userRepository.save(newUser);
 
         shoppingCartService.createNewShoppingCart(newUser);
 
-        verify(shoppingCartRepository).save(argThat(cart -> cart.getUser().equals(newUser)));
+        ShoppingCart found = shoppingCartRepository.findByUser_Id(newUser.getId());
+        assertNotNull(found);
+        assertEquals(newUser.getId(), found.getUser().getId());
     }
 
     @Test
-    void addCartItem_shouldFindUser() {
-        Long bookId = 10L;
-        Book book = new Book();
-        book.setId(bookId);
-
-        CartItemRequestDto requestDto = new CartItemRequestDto(bookId, 2);
-
-        CartItem cartItem = new CartItem();
-        cartItem.setQuantity(2);
-        cartItem.setBook(book);
-
-        when(authentication.getPrincipal()).thenReturn(user);
-        when(bookRepository.findById(bookId)).thenReturn(Optional.of(book));
-        when(shoppingCartRepository.findByUser_Id(user.getId())).thenReturn(cart);
-        when(cartItemMapper.toModel(requestDto)).thenReturn(cartItem);
-
-        shoppingCartService.addCartItem(requestDto, authentication);
-
-        assertNotNull(cart.getCartItems(), "Cart items should not be null");
-        assertTrue(cart.getCartItems().size() > 0, "There should be at least one cart item");
-        assertEquals(bookId, cart.getCartItems().iterator().next().getBook().getId());
-    }
-
-
-    private void addCartItemToCart(CartItemRequestDto itemDto, Book book, ShoppingCart cart) {
-        CartItem cartItem = cartItemMapper.toModel(itemDto);
-        if (cartItem == null) {
-            throw new IllegalArgumentException("CartItem is null");
-        }
-        cartItem.setBook(book);
-        cart.addItemToCart(cartItem);
-    }
-
-    @Test
+    @DisplayName("Exception if a book was’t found")
     void addCartItem_shouldThrowIfBookNotFound() {
-        Long bookId = 100L;
-        CartItemRequestDto requestDto = new CartItemRequestDto(bookId, 1);
-
-        when(bookRepository.findById(bookId)).thenReturn(Optional.empty());
-
-        assertThrows(BookNotFoundException.class, () ->
-                shoppingCartService.addCartItem(requestDto, authentication)
-        );
+        CartItemRequestDto requestDto = new CartItemRequestDto(999L, 1);
+        assertThrows(EntityNotFoundException.class, () ->
+                shoppingCartService.addCartItem(requestDto, authentication));
     }
 
     @Test
+    @DisplayName("Adding a book сorrectly")
     void addCartItemToCart_shouldAddItemCorrectly() {
-        Long bookId = 15L;
-        Book book = new Book();
-        book.setId(bookId);
-        book.setTitle("Test Book");
+        CartItemRequestDto requestDto = new CartItemRequestDto(book.getId(), 3);
+        shoppingCartService.addCartItemToCart(requestDto, book, cart);
 
-        ShoppingCart shoppingCart = new ShoppingCart();
-        shoppingCart.setId(5L);
-        shoppingCart.setCartItems(new HashSet<>());
-
-        CartItemRequestDto requestDto = new CartItemRequestDto(bookId, 3);
-
-        CartItem cartItem = new CartItem();
-        cartItem.setQuantity(3);
-
-        when(cartItemMapper.toModel(requestDto)).thenReturn(cartItem);
-
-        shoppingCartService.addCartItemToCart(requestDto, book, shoppingCart);
-
-        assertEquals(1, shoppingCart.getCartItems().size());
-        CartItem addedItem = shoppingCart.getCartItems().iterator().next();
-        assertEquals(book, addedItem.getBook());
-        assertEquals(3, addedItem.getQuantity());
+        assertEquals(1, cart.getCartItems().size());
+        CartItem added = cart.getCartItems().iterator().next();
+        assertEquals(book.getId(), added.getBook().getId());
+        assertEquals(3, added.getQuantity());
     }
 }

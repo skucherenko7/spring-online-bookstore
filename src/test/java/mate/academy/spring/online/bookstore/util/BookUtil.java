@@ -1,10 +1,11 @@
-package mate.academy.spring.online.bookstore.example;
+package mate.academy.spring.online.bookstore.util;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import mate.academy.spring.online.bookstore.dto.book.BookDto;
 import mate.academy.spring.online.bookstore.dto.book.CreateBookRequestDto;
 import mate.academy.spring.online.bookstore.model.Book;
@@ -14,8 +15,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BookUtil {
 

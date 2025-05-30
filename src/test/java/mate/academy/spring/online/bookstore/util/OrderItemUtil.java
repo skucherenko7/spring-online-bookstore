@@ -1,20 +1,21 @@
-package mate.academy.spring.online.bookstore.example;
+package mate.academy.spring.online.bookstore.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.math.BigDecimal;
 import mate.academy.spring.online.bookstore.dto.orderitem.CreateOrderItemRequestDto;
 import mate.academy.spring.online.bookstore.dto.orderitem.OrderItemResponseDto;
 import mate.academy.spring.online.bookstore.model.Book;
 import mate.academy.spring.online.bookstore.model.Order;
 import mate.academy.spring.online.bookstore.model.OrderItem;
 
-import java.math.BigDecimal;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 public class OrderItemUtil {
     public static CreateOrderItemRequestDto createOrderItemRequestDto() {
         return new CreateOrderItemRequestDto(7L, 2);
     }
-    public static OrderItem createOrderItem(CreateOrderItemRequestDto requestDto, Order order, Book book) {
+
+    public static OrderItem createOrderItem(CreateOrderItemRequestDto requestDto,
+                                            Order order, Book book) {
         OrderItem orderItem = new OrderItem();
         orderItem.setId(1L);
         orderItem.setBook(book);
@@ -49,7 +50,8 @@ public class OrderItemUtil {
         );
     }
 
-    public static void verifyOrderItemResponseDto(OrderItemResponseDto expected, OrderItemResponseDto actual) {
+    public static void verifyOrderItemResponseDto(OrderItemResponseDto expected,
+                                                  OrderItemResponseDto actual) {
         assertEquals(expected.id(), actual.id());
         assertEquals(expected.bookId(), actual.bookId());
         assertEquals(expected.quantity(), actual.quantity());

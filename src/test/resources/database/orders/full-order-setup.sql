@@ -8,7 +8,7 @@ VALUES
     (6, 'Detective', 'Detective books', FALSE);
 
 INSERT INTO users (id, email, password, first_name, last_name, is_deleted)
-VALUES (1, 'user@example.com', 'password', 'Test', 'User', FALSE);
+VALUES (1, 'user@util.com', 'password', 'Test', 'User', FALSE);
 
 INSERT INTO users_roles (user_id, role_id)
 VALUES (1, 1);
@@ -21,11 +21,11 @@ VALUES
 
 INSERT INTO books_categories (book_id, category_id)
 VALUES
-    (1, 5), -- Novel
-    (1, 6), -- Detective
-    (2, 1), -- Poetry
-    (2, 4), -- Fantasy
-    (3, 2); -- Historical
+    (1, 5),
+    (1, 6),
+    (2, 1),
+    (2, 4),
+    (3, 2);
 
 INSERT INTO shopping_carts (id, is_deleted)
 VALUES (1, FALSE);

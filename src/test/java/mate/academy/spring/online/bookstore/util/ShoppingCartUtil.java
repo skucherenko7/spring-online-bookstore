@@ -1,5 +1,10 @@
-package mate.academy.spring.online.bookstore.example;
+package mate.academy.spring.online.bookstore.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.HashSet;
+import java.util.Set;
 import mate.academy.spring.online.bookstore.dto.cartitem.CartItemDto;
 import mate.academy.spring.online.bookstore.dto.shoppingcart.ShoppingCartDto;
 import mate.academy.spring.online.bookstore.dto.shoppingcart.ShoppingCartResponseDto;
@@ -9,22 +14,18 @@ import mate.academy.spring.online.bookstore.model.ShoppingCart;
 import mate.academy.spring.online.bookstore.model.User;
 import mate.academy.spring.online.bookstore.repository.book.BookRepository;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.*;
-
 public class ShoppingCartUtil {
     public static ShoppingCartDto createShoppingCartRequestDto() {
         Set<CartItemDto> cartItems = new HashSet<>();
 
-        cartItems.add(new CartItemDto(1L, 7, "Marusya Churai", 2));
+        cartItems.add(new CartItemDto(1L, 1, "Seven Husbands of Evelyn Hugo", 2));
         cartItems.add(new CartItemDto(2L, 2, "Lisova pisnya", 2));
 
         return new ShoppingCartDto(50L, 50L, cartItems);
     }
 
-    public static ShoppingCart createShoppingCart(ShoppingCartDto dto, User user, BookRepository bookRepository) {
+    public static ShoppingCart createShoppingCart(ShoppingCartDto dto, User user,
+                                                  BookRepository bookRepository) {
         ShoppingCart shoppingCart = new ShoppingCart();
         shoppingCart.setUser(user);
 
@@ -34,8 +35,8 @@ public class ShoppingCartUtil {
             cartItem.setQuantity(itemDto.quantity());
 
             Book book = bookRepository.findById(Long.valueOf(itemDto.bookId()))
-                    .orElseThrow(() -> new RuntimeException("Book not found with ID: " + itemDto.bookId()));
-
+                    .orElseThrow(() -> new RuntimeException("Book not found with "
+                            + "ID: " + itemDto.bookId()));
             cartItem.setBook(book);
 
             shoppingCart.addItemToCart(cartItem);
@@ -45,9 +46,8 @@ public class ShoppingCartUtil {
     }
 
     public static ShoppingCartResponseDto createShoppingCartResponseDto(ShoppingCart shoppingCart) {
-        return new ShoppingCartResponseDto(
-                shoppingCart.getId()
-        );
+        return new ShoppingCartResponseDto(shoppingCart.getId(), shoppingCart.isDeleted());
+
     }
 
     public static void verifyShoppingCart(ShoppingCart expected, ShoppingCart actual) {
@@ -57,8 +57,8 @@ public class ShoppingCartUtil {
 
         for (CartItem expectedItem : expected.getCartItems()) {
             boolean matchFound = actual.getCartItems().stream().anyMatch(actualItem ->
-                    actualItem.getBook().getId().equals(expectedItem.getBook().getId()) &&
-                            actualItem.getQuantity() == expectedItem.getQuantity()
+                    actualItem.getBook().getId().equals(expectedItem.getBook().getId())
+                            && actualItem.getQuantity() == expectedItem.getQuantity()
             );
             assertTrue(matchFound, "Expected item not found: " + expectedItem.getBook().getId());
         }

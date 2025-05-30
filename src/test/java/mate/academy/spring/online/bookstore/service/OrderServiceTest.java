@@ -1,5 +1,20 @@
 package mate.academy.spring.online.bookstore.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import mate.academy.spring.online.bookstore.dto.order.CreateOrderRequestDto;
 import mate.academy.spring.online.bookstore.dto.order.OrderResponseDto;
 import mate.academy.spring.online.bookstore.dto.order.UpdateOrderStatusRequestDto;
@@ -8,12 +23,18 @@ import mate.academy.spring.online.bookstore.exception.EntityNotFoundException;
 import mate.academy.spring.online.bookstore.exception.OrderProcessingException;
 import mate.academy.spring.online.bookstore.mapper.OrderItemMapper;
 import mate.academy.spring.online.bookstore.mapper.OrderMapper;
-import mate.academy.spring.online.bookstore.model.*;
+import mate.academy.spring.online.bookstore.model.Book;
+import mate.academy.spring.online.bookstore.model.CartItem;
+import mate.academy.spring.online.bookstore.model.Order;
+import mate.academy.spring.online.bookstore.model.OrderItem;
+import mate.academy.spring.online.bookstore.model.ShoppingCart;
+import mate.academy.spring.online.bookstore.model.User;
 import mate.academy.spring.online.bookstore.repository.order.OrderItemRepository;
 import mate.academy.spring.online.bookstore.repository.order.OrderRepository;
 import mate.academy.spring.online.bookstore.repository.shoppingcart.ShoppingCartRepository;
 import mate.academy.spring.online.bookstore.service.order.OrderServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -21,16 +42,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 public class OrderServiceTest {
 
@@ -68,6 +79,7 @@ public class OrderServiceTest {
     }
 
     @Test
+    @DisplayName("Should create order successfully when cart has items")
     void save_shouldCreateOrderSuccessfully() {
         CreateOrderRequestDto requestDto = new CreateOrderRequestDto();
         requestDto.setShippingAddress("145 Main St, City, Country");
@@ -75,7 +87,7 @@ public class OrderServiceTest {
         User user = new User();
         user.setId(1L);
 
-        ShoppingCart shoppingCart = new ShoppingCart();
+        final ShoppingCart shoppingCart = new ShoppingCart();
         CartItem item = new CartItem();
         Book book = new Book();
         book.setId(1L);
@@ -85,7 +97,8 @@ public class OrderServiceTest {
         shoppingCart.addItemToCart(item);
 
         when(shoppingCartRepository.findByUser_Id(user.getId())).thenReturn(shoppingCart);
-        when(orderMapper.toDto(any())).thenReturn(new OrderResponseDto(1L, 1L, Set.of(), LocalDateTime.now(),
+        when(orderMapper.toDto(any()))
+                .thenReturn(new OrderResponseDto(1L, 1L, Set.of(), LocalDateTime.now(),
                 BigDecimal.valueOf(100), "PENDING"));
         when(orderRepository.save(any())).thenReturn(new Order());
 
@@ -99,9 +112,10 @@ public class OrderServiceTest {
     }
 
     @Test
+    @DisplayName("Should throw OrderProcessingException when shopping cart is empty")
     void save_shouldThrowOrderProcessingExceptionWhenCartIsEmpty() {
         CreateOrderRequestDto requestDto = new CreateOrderRequestDto();
-        requestDto.setShippingAddress("123 Адреса");
+        requestDto.setShippingAddress("123 Main St, City, Country");
 
         shoppingCart.setCartItems(new HashSet<>());
 
@@ -113,9 +127,10 @@ public class OrderServiceTest {
     }
 
     @Test
+    @DisplayName("Should return order items for given order and user")
     void getOrderItems_shouldReturnOrderItems() {
-        Long orderId = 1L;
-        Long userId = 1L;
+        final Long orderId = 1L;
+        final Long userId = 1L;
 
         Order order = new Order();
 
@@ -136,9 +151,12 @@ public class OrderServiceTest {
     }
 
     @Test
+    @DisplayName("Should update order status successfully")
     void updateOrderStatus_shouldUpdateOrderStatus() {
-        Long orderId = 1L;
-        UpdateOrderStatusRequestDto updateDto = new UpdateOrderStatusRequestDto(Order.Status.SHIPPED);
+        final Long orderId = 1L;
+        final UpdateOrderStatusRequestDto updateDto = new UpdateOrderStatusRequestDto(Order
+                .Status
+                .SHIPPED);
 
         Order order = new Order();
         order.setId(orderId);
@@ -155,10 +173,13 @@ public class OrderServiceTest {
     }
 
     @Test
+    @DisplayName("Should throw EntityNotFoundException when updating status of non-existent order")
     void updateOrderStatus_shouldThrowExceptionIfOrderNotFound() {
         Long orderId = 999L;
 
-        UpdateOrderStatusRequestDto updateDto = new UpdateOrderStatusRequestDto(Order.Status.SHIPPED);
+        UpdateOrderStatusRequestDto updateDto = new UpdateOrderStatusRequestDto(Order
+                .Status
+                .SHIPPED);
 
         when(orderRepository.findById(orderId)).thenReturn(Optional.empty());
 
@@ -170,6 +191,7 @@ public class OrderServiceTest {
     }
 
     @Test
+    @DisplayName("Should return order by ID")
     void findById_shouldReturnOrderDto() {
         Long orderId = 1L;
         Long userId = 1L;
@@ -195,6 +217,7 @@ public class OrderServiceTest {
     }
 
     @Test
+    @DisplayName("Should return list of all orders for user")
     void findAll_shouldReturnListOfOrders() {
 
         Long userId = 1L;
@@ -226,6 +249,7 @@ public class OrderServiceTest {
     }
 
     @Test
+    @DisplayName("Should return specific order item for given order and user")
     void getOrderItem_shouldReturnOrderItem() {
         Long orderId = 1L;
         Long itemId = 1L;
@@ -246,6 +270,7 @@ public class OrderServiceTest {
     }
 
     @Test
+    @DisplayName("Should throw EntityNotFoundException when order item not found")
     void getOrderItem_shouldThrowExceptionIfOrderItemNotFound() {
 
         Long orderId = 1L;

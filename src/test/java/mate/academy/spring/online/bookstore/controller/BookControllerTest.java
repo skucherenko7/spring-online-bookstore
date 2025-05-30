@@ -1,35 +1,47 @@
 package mate.academy.spring.online.bookstore.controller;
 
+import static mate.academy.spring.online.bookstore.util.BookUtil.creatBookRequestDto;
+import static mate.academy.spring.online.bookstore.util.BookUtil.createExpectedBookDto;
+import static mate.academy.spring.online.bookstore.util.BookUtil.getBookDto;
+import static mate.academy.spring.online.bookstore.util.BookUtil.getInvalidCreateBookRequestDto;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.sql.Connection;
+import java.sql.SQLException;
+import javax.sql.DataSource;
 import lombok.SneakyThrows;
 import mate.academy.spring.online.bookstore.dto.book.BookDto;
 import mate.academy.spring.online.bookstore.dto.book.CreateBookRequestDto;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
-
-import static mate.academy.spring.online.bookstore.example.BookUtil.*;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class BookControllerTest {private static final String INSERT_BOOKS_SCRIPT_PATH =
-        "database/books/insert-books-with-categories-to-test-db.sql";
+public class BookControllerTest {
+    private static final String INSERT_BOOKS_SCRIPT_PATH =
+            "database/books/insert-books-with-categories-to-test-db.sql";
     private static final String INSERT_CATEGORIES_SCRIPT_PATH =
             "database/category/insert-categories-to-test-db.sql";
     private static final String REMOVE_ALL_SCRIPT_PATH =
@@ -79,28 +91,29 @@ public class BookControllerTest {private static final String INSERT_BOOKS_SCRIPT
     static void afterAll(@Autowired DataSource dataSource) {
         teardown(dataSource);
     }
-        @Test
-        @DisplayName("Create book with valid data")
-        @WithMockUser(username = "admin", roles = {"ADMIN"})
-        void createBook_ValidData_ShouldReturnCreatedBookDto() throws Exception {
-            Long testId = 3L;
 
-            BookDto expectedDto = createExpectedBookDto(testId);
-            CreateBookRequestDto requestDto = creatBookRequestDto();
+    @Test
+    @DisplayName("Create book with valid data")
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
+    void createBook_ValidData_ShouldReturnCreatedBookDto() throws Exception {
+        Long testId = 3L;
 
-            String jsonRequest = objectMapper.writeValueAsString(requestDto);
+        BookDto expectedDto = createExpectedBookDto(testId);
+        CreateBookRequestDto requestDto = creatBookRequestDto();
 
-            MvcResult result = mockMvc.perform(post("/books")
-                            .content(jsonRequest)
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isCreated())
-                    .andReturn();
+        String jsonRequest = objectMapper.writeValueAsString(requestDto);
 
-            BookDto resultDto = objectMapper.readValue(
-                    result.getResponse().getContentAsString(), BookDto.class);
+        MvcResult result = mockMvc.perform(post("/books")
+                        .content(jsonRequest)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated())
+                .andReturn();
 
-            verifyBookDtoEquality(expectedDto, resultDto);
-        }
+        BookDto resultDto = objectMapper.readValue(
+                result.getResponse().getContentAsString(), BookDto.class);
+
+        verifyBookDtoEquality(expectedDto, resultDto);
+    }
 
     @Test
     @DisplayName("Create book with invalid data")
@@ -205,7 +218,7 @@ public class BookControllerTest {private static final String INSERT_BOOKS_SCRIPT
         BookDto resultDto = objectMapper.readValue(
                 result.getResponse().getContentAsString(), BookDto.class);
 
-        verifyBookDtoEquality (expectedDto, resultDto);
+        verifyBookDtoEquality(expectedDto, resultDto);
     }
 
     @Test
@@ -213,7 +226,7 @@ public class BookControllerTest {private static final String INSERT_BOOKS_SCRIPT
     @WithMockUser(username = "user", roles = {"USER"})
     void searchBooks_ShouldReturnFilteredBooks() throws Exception {
         MvcResult result = mockMvc.perform(get("/books/search")
-                        .param("title", "Seven Husbands of Evelyn Hugo") // або інші значення параметрів
+                        .param("title", "Seven Husbands of Evelyn Hugo")
                         .param("author", "Taylor Jenkins Reid")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -221,7 +234,7 @@ public class BookControllerTest {private static final String INSERT_BOOKS_SCRIPT
 
         String response = result.getResponse().getContentAsString();
 
-        assertTrue(response.contains("Seven Husbands of Evelyn Hugo")); // перевірка наявності
+        assertTrue(response.contains("Seven Husbands of Evelyn Hugo"));
     }
 
     @Test
@@ -237,7 +250,7 @@ public class BookControllerTest {private static final String INSERT_BOOKS_SCRIPT
 
         String response = result.getResponse().getContentAsString();
 
-        assertTrue(response.contains("content")); // перевірка, що повертається сторінка
+        assertTrue(response.contains("content"));
     }
 
     @Test
@@ -262,5 +275,4 @@ public class BookControllerTest {private static final String INSERT_BOOKS_SCRIPT
         assertEquals(expected.getPrice(), actual.getPrice());
         assertEquals(expected.getCategoriesIds(), actual.getCategoriesIds());
     }
-
 }
