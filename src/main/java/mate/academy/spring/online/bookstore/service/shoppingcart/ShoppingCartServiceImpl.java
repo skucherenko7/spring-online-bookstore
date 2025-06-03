@@ -42,7 +42,8 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         }
 
         Book book = bookRepository.findById(itemDto.bookId())
-                .orElseThrow(() -> new EntityNotFoundException("Book not found"));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Book not found with ID: " + itemDto.bookId()));
         if (cart.getCartItems() == null) {
             cart.setCartItems(new HashSet<>());
         }
@@ -63,9 +64,9 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
                                               UpdateCartItemRequestDto requestDto,
                                               Authentication authentication) {
         Long userId = findUser(authentication);
-        final ShoppingCart initialCart = shoppingCartRepository.findByUser_Id(userId);
+        ShoppingCart cart = shoppingCartRepository.findByUser_Id(userId);
 
-        CartItem cartItem = cartItemRepository.findByIdAndShoppingCartId(id, initialCart.getId())
+        CartItem cartItem = cartItemRepository.findByIdAndShoppingCartId(id, cart.getId())
                 .map(item -> {
                     item.setQuantity(requestDto.getQuantity());
                     return item;
@@ -73,13 +74,9 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
                 .orElseThrow(() -> new EntityNotFoundException("Can't find cart item by id " + id));
         cartItemRepository.save(cartItem);
 
-        ShoppingCart updatedCart = shoppingCartRepository.findById(initialCart.getId())
-                .orElseThrow(() -> new EntityNotFoundException("Can't find cart by id "
-                        + initialCart.getId()));
+        Hibernate.initialize(cart.getCartItems());
 
-        Hibernate.initialize(updatedCart.getCartItems());
-
-        return shoppingCartMapper.toDto(updatedCart);
+        return shoppingCartMapper.toDto(cart);
     }
 
     @Override
