@@ -96,6 +96,14 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public List<OrderResponseDto> getOrders(Long userId) {
+        List<Order> orders = orderRepository.findAllByUserId(userId);
+        return orders.stream()
+                .map(orderMapper::toDto)
+                .toList();
+    }
+
+    @Override
     public OrderItemResponseDto getOrderItem(Long orderId, Long itemId, Long userId) {
         OrderItem orderItem = orderItemRepository
                 .findByIdAndOrder_IdAndOrder_User_Id(itemId, orderId, userId)

@@ -1,5 +1,6 @@
 package mate.academy.spring.online.bookstore.repository.order;
 
+import java.util.List;
 import java.util.Optional;
 import mate.academy.spring.online.bookstore.model.Order;
 import mate.academy.spring.online.bookstore.model.User;
@@ -9,6 +10,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
     Page<Order> findByUser(User user, Pageable pageable);
+
+    List<Order> findAllByUserId(Long userId);
 
     Optional<Order> findByIdAndUserId(Long orderId, Long userId);
 }
