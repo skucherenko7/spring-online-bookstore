@@ -46,7 +46,7 @@ This project is built using modern technologies such as **Java**, **Spring Boot*
 
 ### **The scheme of relationships in the database**:
 
-![scheme](scheme-relationships-bookstore.png)
+![Scheme](scheme-relationships-bookstore.png)
 
 ---
 
@@ -97,7 +97,7 @@ This project is built using modern technologies such as **Java**, **Spring Boot*
 
     Before starting, make sure you have the following components installed:
 
-![scheme](system_requirements.png)
+![Scheme](system_requirements.png)
 
 ---
 
