@@ -1,6 +1,6 @@
 ## **Progect "BookStore App"**
 
-    Welcome to the *scalable and modular RESTful API** — **BookStore  Backend**.  
+Welcome to the *scalable and modular RESTful API** — **BookStore  Backend**.  
 This project is built using modern technologies such as **Java**, **Spring Boot**, **Spring Security**, **Spring Data JPA**, **Swagger**, **Docker**, and more.
 
 ### **Project Purpose**
@@ -97,7 +97,7 @@ This project is built using modern technologies such as **Java**, **Spring Boot*
 
     Before starting, make sure you have the following components installed:
 
-![Scheme](system_requirements.png)
+![Scheme](scheme-system-requirements.png)
 
 ---
 
