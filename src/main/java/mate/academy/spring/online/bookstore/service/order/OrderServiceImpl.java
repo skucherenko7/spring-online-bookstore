@@ -37,7 +37,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderResponseDto save(User user, CreateOrderRequestDto createOrderRequestDto) {
-        ShoppingCart shoppingCart = shoppingCartRepository.findByUserId(user.getId());
+        ShoppingCart shoppingCart = shoppingCartRepository.findByUser_Id(user.getId());
 
         if (shoppingCart == null || shoppingCart.getCartItems().isEmpty()) {
             throw new OrderProcessingException("Shoppingcart is empty! You can't place an order.",
@@ -49,7 +49,9 @@ public class OrderServiceImpl implements OrderService {
         List<OrderItem> orderItems = createOrderItems(order, shoppingCart);
         order.setOrderItems(new HashSet<>(orderItems));
         orderRepository.save(order);
+
         shoppingCart.clear();
+        shoppingCartRepository.save(shoppingCart);
         return orderMapper.toDto(order);
     }
 
