@@ -103,14 +103,14 @@ Before starting, make sure you have the following components installed:
 
 ## 2. Cloning the project from GitHub: 
 
-+fork the repository:
++ fork the repository:
         - [go to the page] (https://github.com/skucherenko7/spring-online-bookstore);
         - click the **Fork** button in the upper right corner;
         - select your GitHub account or organization.
     
     You have your own copy of the project now!
-  
-+clone the fork locally:
+
++ clone the fork locally:
         - use terminal to clone.
 ```
 git clone https://github.com/skucherenko7/spring-online-bookstore.git
