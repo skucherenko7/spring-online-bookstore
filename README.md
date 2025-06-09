@@ -5,7 +5,7 @@ This project is built using modern technologies such as **Java**, **Spring Boot*
 
 ### **Project Purpose**
 
-    The goal of this application is to provide full functionality for an online bookstore:
+The goal of this application is to provide full functionality for an online bookstore:
 - manage users and authentication;
 - manage and browse books, categories;
 - handle shopping carts and order processing.
@@ -37,7 +37,7 @@ This project is built using modern technologies such as **Java**, **Spring Boot*
 
 ### **Project structure**
 
-    This project is an application with a multi-level architecture:
+This project is an application with a multi-level architecture:
  - model layer - defines domain entities and data transfer objects (DTOs);
  - repository layer - interacts with the database using Spring Data JPA;
  - service layer - characterized by the presence of business logic, and is also an intermediary between repositories and controllers;
@@ -52,7 +52,7 @@ This project is built using modern technologies such as **Java**, **Spring Boot*
 
 ### **Main Features and Functionalities**
     
-    The system is implemented on the basis of RESTful architecture and includes the following key controllers:
+The system is implemented on the basis of RESTful architecture and includes the following key controllers:
 
 ## **'AuthenticationController':**
 - **POST: `/registration`** - register new users (with role USER);
@@ -95,7 +95,7 @@ This project is built using modern technologies such as **Java**, **Spring Boot*
 
 ## 1. Check the necessary tools.
 
-    Before starting, make sure you have the following components installed:
+Before starting, make sure you have the following components installed:
 
 ![Scheme](scheme-system-requirements.png)
 
@@ -103,15 +103,15 @@ This project is built using modern technologies such as **Java**, **Spring Boot*
 
 ## 2. Cloning the project from GitHub: 
 
-    🔹 fork the repository:
++fork the repository:
         - [go to the page] (https://github.com/skucherenko7/spring-online-bookstore);
         - click the **Fork** button in the upper right corner;
         - select your GitHub account or organization.
     
     You have your own copy of the project now!
   
-    🔹 clone the fork locally:
-        - use terminal to clone
++clone the fork locally:
+        - use terminal to clone.
 ```
 git clone https://github.com/skucherenko7/spring-online-bookstore.git
 cd spring-online-bookstore
