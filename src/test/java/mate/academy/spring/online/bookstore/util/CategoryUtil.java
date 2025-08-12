@@ -1,13 +1,12 @@
-package mate.academy.spring.online.bookstore.example;
-
-import mate.academy.spring.online.bookstore.dto.book.BookDtoWithoutCategoryIds;
-import mate.academy.spring.online.bookstore.dto.category.CategoryDto;
-import mate.academy.spring.online.bookstore.dto.category.CreateCategoryRequestDto;
-import mate.academy.spring.online.bookstore.model.Category;
+package mate.academy.spring.online.bookstore.util;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
+import mate.academy.spring.online.bookstore.dto.book.BookDtoWithoutCategoryIds;
+import mate.academy.spring.online.bookstore.dto.category.CategoryDto;
+import mate.academy.spring.online.bookstore.dto.category.CreateCategoryRequestDto;
+import mate.academy.spring.online.bookstore.model.Category;
 
 public class CategoryUtil {
     public static Category createCategory() {
@@ -56,7 +55,6 @@ public class CategoryUtil {
         return Arrays.asList(book1, book2);
     }
 
-
     public static CategoryDto updateCategory(Long id, String name, String description) {
         return new CategoryDto(id, name, description);
     }
@@ -78,4 +76,5 @@ public class CategoryUtil {
         String name = "createName";
         String description = "createDescription";
         return new CategoryDto(null, name, description);
-    }}
+    }
+}
