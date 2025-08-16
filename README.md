@@ -1,5 +1,4 @@
-<<<<<<< HEAD
-## **Progect "BookStore App"**
+## **Project "BookStore App"**
 
 Welcome to the *scalable and modular RESTful API** — **BookStore  Backend**.  
 This project is built using modern technologies such as **Java**, **Spring Boot**, **Spring Security**, **Spring Data JPA**, **Swagger**, **Docker**, and more.
@@ -312,6 +311,3 @@ If you want to test the application as a regular user, you must register by crea
 [▶️ Watch the demo video](https://www.loom.com/share/ee0c738720d34b948b5a92e0525daafd?sid=230a17d9-0747-4d92-bbd6-6b39b00ae34a)
 
 ---
-=======
-# spring-online-bookstore
->>>>>>> backup-9059aa8

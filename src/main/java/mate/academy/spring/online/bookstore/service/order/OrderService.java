@@ -18,6 +18,8 @@ public interface OrderService {
 
     OrderResponseDto findById(Long id);
 
+    List<OrderResponseDto> getOrders(Long userId);
+
     List<OrderResponseDto> findAll(User user, Pageable pageable);
 
     OrderItemResponseDto getOrderItem(Long orderId, Long itemId, Long userId);

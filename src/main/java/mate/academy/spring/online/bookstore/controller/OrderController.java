@@ -12,7 +12,6 @@ import mate.academy.spring.online.bookstore.dto.order.UpdateOrderStatusRequestDt
 import mate.academy.spring.online.bookstore.dto.orderitem.OrderItemResponseDto;
 import mate.academy.spring.online.bookstore.model.User;
 import mate.academy.spring.online.bookstore.service.order.OrderService;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -39,9 +38,9 @@ public class OrderController {
     @GetMapping
     @Operation(summary = "Get a user's order history",
             description = "Retrieve the list of orders placed by a user")
-    public List<OrderResponseDto> getUserOrders(Authentication authentication, Pageable pageable) {
-        User user = (User) authentication.getPrincipal();
-        return orderService.findAll(user, pageable);
+    public List<OrderResponseDto> getUserOrders(Authentication authentication) {
+        Long userId = ((User) authentication.getPrincipal()).getId();
+        return orderService.getOrders(userId);
     }
 
     @PreAuthorize("hasRole('USER')")
