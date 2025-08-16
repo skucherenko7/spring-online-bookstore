@@ -33,3 +33,9 @@ build/
 .vscode/
 
 .env
+
+config/
+*.sql
+*.flowfile.yaml
+*.flow
+readme-content.txt
