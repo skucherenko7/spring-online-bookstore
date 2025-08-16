@@ -5,7 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-<<<<<<< HEAD
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
@@ -19,32 +18,16 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
-=======
-import jakarta.persistence.Table;
-import java.math.BigDecimal;
-import lombok.Getter;
-import lombok.Setter;
->>>>>>> backup-9059aa8
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
 @Entity
-<<<<<<< HEAD
 @Getter
 @Setter
 @Table(name = "books")
-@Accessors(chain = true)
 @SQLDelete(sql = "UPDATE books SET is_deleted = true WHERE id = ?")
 @SQLRestriction(value = "is_deleted = false")
 @NoArgsConstructor
-=======
-@SQLDelete(sql = "UPDATE books SET is_deleted = true WHERE id = ?")
-@SQLRestriction("is_deleted = false")
-@Table(name = "books")
-@Getter
-@Setter
-
->>>>>>> backup-9059aa8
 public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -67,7 +50,6 @@ public class Book {
 
     private String coverImage;
 
-<<<<<<< HEAD
     @Column(nullable = false, columnDefinition = "TINYINT", length = 1)
     private boolean isDeleted;
 
@@ -84,8 +66,4 @@ public class Book {
     public Book(Long id) {
         this.id = id;
     }
-=======
-    @Column(name = "is_deleted", nullable = false)
-    private boolean isDeleted;
->>>>>>> backup-9059aa8
 }
