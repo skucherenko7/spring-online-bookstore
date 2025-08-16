@@ -1,6 +1,5 @@
 package mate.academy.spring.online.bookstore.service;
 
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import mate.academy.spring.online.bookstore.dto.BookDto;
 import mate.academy.spring.online.bookstore.dto.BookSearchParametersDto;
@@ -10,6 +9,8 @@ import mate.academy.spring.online.bookstore.mapper.BookMapper;
 import mate.academy.spring.online.bookstore.model.Book;
 import mate.academy.spring.online.bookstore.repository.BookRepository;
 import mate.academy.spring.online.bookstore.repository.book.BookSpecificationBuilder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -35,10 +36,9 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public List<BookDto> findAll() {
-        return bookRepository.findAll().stream()
-                .map(bookMapper::toDto)
-                .toList();
+    public Page<BookDto> findAll(Pageable pageable) {
+        return bookRepository.findAll(pageable)
+                .map(bookMapper::toDto);
     }
 
     @Override
@@ -55,11 +55,9 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public List<BookDto> search(BookSearchParametersDto params) {
+    public Page<BookDto> search(BookSearchParametersDto params, Pageable pageable) {
         Specification<Book> bookSpecification = bookSpecificationBuilder.build(params);
-        return bookRepository.findAll(bookSpecification)
-                .stream()
-                .map(bookMapper::toDto)
-                .toList();
+        return bookRepository.findAll(bookSpecification, pageable)
+                .map(bookMapper::toDto);
     }
 }
