@@ -7,7 +7,7 @@ VALUES
 
 INSERT INTO books_categories (book_id, category_id)
 VALUES
+    (1, 3),
     (1, 5),
-    (1, 7),
-    (2, 2),
-    (2, 6);
+    (2, 1),
+    (2, 4);

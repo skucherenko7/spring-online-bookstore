@@ -1,0 +1,289 @@
+package mate.academy.spring.online.bookstore.service;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import mate.academy.spring.online.bookstore.dto.order.CreateOrderRequestDto;
+import mate.academy.spring.online.bookstore.dto.order.OrderResponseDto;
+import mate.academy.spring.online.bookstore.dto.order.UpdateOrderStatusRequestDto;
+import mate.academy.spring.online.bookstore.dto.orderitem.OrderItemResponseDto;
+import mate.academy.spring.online.bookstore.exception.EntityNotFoundException;
+import mate.academy.spring.online.bookstore.exception.OrderProcessingException;
+import mate.academy.spring.online.bookstore.mapper.OrderItemMapper;
+import mate.academy.spring.online.bookstore.mapper.OrderMapper;
+import mate.academy.spring.online.bookstore.model.Book;
+import mate.academy.spring.online.bookstore.model.CartItem;
+import mate.academy.spring.online.bookstore.model.Order;
+import mate.academy.spring.online.bookstore.model.OrderItem;
+import mate.academy.spring.online.bookstore.model.ShoppingCart;
+import mate.academy.spring.online.bookstore.model.User;
+import mate.academy.spring.online.bookstore.repository.order.OrderItemRepository;
+import mate.academy.spring.online.bookstore.repository.order.OrderRepository;
+import mate.academy.spring.online.bookstore.repository.shoppingcart.ShoppingCartRepository;
+import mate.academy.spring.online.bookstore.service.order.OrderServiceImpl;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+
+public class OrderServiceTest {
+
+    @InjectMocks
+    private OrderServiceImpl orderService;
+
+    @Mock
+    private ShoppingCartRepository shoppingCartRepository;
+
+    @Mock
+    private OrderRepository orderRepository;
+
+    @Mock
+    private OrderItemRepository orderItemRepository;
+
+    @Mock
+    private OrderMapper orderMapper;
+
+    @Mock
+    private OrderItemMapper orderItemMapper;
+
+    private User user;
+    private ShoppingCart shoppingCart;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        user = new User();
+        user.setId(1L);
+
+        shoppingCart = new ShoppingCart();
+        shoppingCart.setId(1L);
+        shoppingCart.setUser(user);
+        shoppingCart.setCartItems(new HashSet<>());
+    }
+
+    @Test
+    @DisplayName("Should create order successfully when cart has items")
+    void save_shouldCreateOrderSuccessfully() {
+        CreateOrderRequestDto requestDto = new CreateOrderRequestDto();
+        requestDto.setShippingAddress("145 Main St, City, Country");
+
+        User user = new User();
+        user.setId(1L);
+
+        final ShoppingCart shoppingCart = new ShoppingCart();
+        CartItem item = new CartItem();
+        Book book = new Book();
+        book.setId(1L);
+        book.setPrice(BigDecimal.valueOf(20));
+        item.setBook(book);
+        item.setQuantity(1);
+        shoppingCart.addItemToCart(item);
+
+        when(shoppingCartRepository.findByUser_Id(user.getId())).thenReturn(shoppingCart);
+        when(orderMapper.toDto(any()))
+                .thenReturn(new OrderResponseDto(1L, 1L, Set.of(), LocalDateTime.now(),
+                BigDecimal.valueOf(100), "PENDING"));
+        when(orderRepository.save(any())).thenReturn(new Order());
+
+        OrderResponseDto result = orderService.save(user, requestDto);
+
+        assertNotNull(result);
+        verify(shoppingCartRepository).findByUser_Id(user.getId());
+        verify(orderRepository).save(any());
+        verify(shoppingCartRepository).save(shoppingCart);
+
+    }
+
+    @Test
+    @DisplayName("Should throw OrderProcessingException when shopping cart is empty")
+    void save_shouldThrowOrderProcessingExceptionWhenCartIsEmpty() {
+        CreateOrderRequestDto requestDto = new CreateOrderRequestDto();
+        requestDto.setShippingAddress("123 Main St, City, Country");
+
+        shoppingCart.setCartItems(new HashSet<>());
+
+        OrderProcessingException exception = assertThrows(OrderProcessingException.class, () -> {
+            orderService.save(user, requestDto);
+        });
+
+        assertEquals("Shoppingcart is empty! You can't place an order.", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should return order items for given order and user")
+    void getOrderItems_shouldReturnOrderItems() {
+        final Long orderId = 1L;
+        final Long userId = 1L;
+
+        Order order = new Order();
+
+        OrderItem orderItem = new OrderItem();
+        orderItem.setId(1L);
+
+        order.setOrderItems(new HashSet<>());
+        order.getOrderItems().add(orderItem);
+
+        when(orderRepository.findByIdAndUserId(orderId, userId)).thenReturn(Optional.of(order));
+        when(orderItemMapper.toDto(any())).thenReturn(new OrderItemResponseDto(1L, 1L, 2));
+
+        List<OrderItemResponseDto> result = orderService.getOrderItems(orderId, userId);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        verify(orderRepository).findByIdAndUserId(orderId, userId);
+    }
+
+    @Test
+    @DisplayName("Should update order status successfully")
+    void updateOrderStatus_shouldUpdateOrderStatus() {
+        final Long orderId = 1L;
+        final UpdateOrderStatusRequestDto updateDto = new UpdateOrderStatusRequestDto(Order
+                .Status
+                .SHIPPED);
+
+        Order order = new Order();
+        order.setId(orderId);
+        order.setStatus(Order.Status.PENDING);
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(orderRepository.save(any())).thenReturn(order);
+
+        UpdateOrderStatusRequestDto result = orderService.updateOrderStatus(orderId, updateDto);
+
+        assertEquals(Order.Status.SHIPPED, result.status());
+
+        verify(orderRepository).save(order);
+    }
+
+    @Test
+    @DisplayName("Should throw EntityNotFoundException when updating status of non-existent order")
+    void updateOrderStatus_shouldThrowExceptionIfOrderNotFound() {
+        Long orderId = 999L;
+
+        UpdateOrderStatusRequestDto updateDto = new UpdateOrderStatusRequestDto(Order
+                .Status
+                .SHIPPED);
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.empty());
+
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
+            orderService.updateOrderStatus(orderId, updateDto);
+        });
+
+        assertEquals("Order not found with ID: " + orderId, exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should return order by ID")
+    void findById_shouldReturnOrderDto() {
+        Long orderId = 1L;
+        Long userId = 1L;
+        Order order = new Order();
+        order.setId(orderId);
+
+        Set<OrderItemResponseDto> orderItems = new HashSet<>();
+        BigDecimal total = BigDecimal.valueOf(100.0);
+        String status = "PENDING";
+        LocalDateTime orderDate = LocalDateTime.now();
+
+        OrderResponseDto orderResponseDto = new OrderResponseDto(
+                orderId, userId, orderItems, orderDate, total, status
+        );
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(orderMapper.toDto(any())).thenReturn(orderResponseDto);
+
+        OrderResponseDto result = orderService.findById(orderId);
+
+        assertNotNull(result);
+        verify(orderRepository).findById(orderId);
+    }
+
+    @Test
+    @DisplayName("Should return list of all orders for user")
+    void findAll_shouldReturnListOfOrders() {
+
+        Long userId = 1L;
+        Pageable pageable = Pageable.unpaged();
+        User user = new User();
+        user.setId(userId);
+
+        Order order = new Order();
+        Page<Order> orders = new PageImpl<>(List.of(order));
+
+        when(orderRepository.findByUser(eq(user), eq(pageable))).thenReturn(orders);
+
+        OrderResponseDto orderResponseDto = new OrderResponseDto(
+                1L,
+                1L,
+                Set.of(),
+                LocalDateTime.now(),
+                BigDecimal.valueOf(100),
+                "PENDING"
+        );
+
+        when(orderMapper.toDto(any(Order.class))).thenReturn(orderResponseDto);
+
+        List<OrderResponseDto> result = orderService.findAll(user, pageable);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        verify(orderRepository).findByUser(eq(user), eq(pageable));
+    }
+
+    @Test
+    @DisplayName("Should return specific order item for given order and user")
+    void getOrderItem_shouldReturnOrderItem() {
+        Long orderId = 1L;
+        Long itemId = 1L;
+        Long userId = 1L;
+        OrderItem orderItem = new OrderItem();
+        orderItem.setId(itemId);
+
+        OrderItemResponseDto orderItemResponseDto = new OrderItemResponseDto(itemId, 1L, 2);
+
+        when(orderItemRepository.findByIdAndOrder_IdAndOrder_User_Id(itemId, orderId, userId))
+                .thenReturn(Optional.of(orderItem));
+        when(orderItemMapper.toDto(any())).thenReturn(orderItemResponseDto);
+
+        OrderItemResponseDto result = orderService.getOrderItem(orderId, itemId, userId);
+
+        assertNotNull(result);
+        verify(orderItemRepository).findByIdAndOrder_IdAndOrder_User_Id(itemId, orderId, userId);
+    }
+
+    @Test
+    @DisplayName("Should throw EntityNotFoundException when order item not found")
+    void getOrderItem_shouldThrowExceptionIfOrderItemNotFound() {
+
+        Long orderId = 1L;
+        Long itemId = 999L;
+        Long userId = 1L;
+
+        when(orderItemRepository.findByIdAndOrder_IdAndOrder_User_Id(itemId, orderId, userId))
+                .thenReturn(Optional.empty());
+
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
+            orderService.getOrderItem(orderId, itemId, userId);
+        });
+
+        assertTrue(exception.getMessage().contains("OrderItem not found with ID"));
+    }
+}

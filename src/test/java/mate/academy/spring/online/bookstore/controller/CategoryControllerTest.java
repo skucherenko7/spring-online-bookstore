@@ -1,20 +1,32 @@
 package mate.academy.spring.online.bookstore.controller;
 
-import static mate.academy.spring.online.bookstore.example.CategoryUtil.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static mate.academy.spring.online.bookstore.util.CategoryUtil.createCategoryRequestDto;
+import static mate.academy.spring.online.bookstore.util.CategoryUtil.expectedNewCategory;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Connection;
 import java.sql.SQLException;
 import javax.sql.DataSource;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import mate.academy.spring.online.bookstore.dto.book.BookDtoWithoutCategoryIds;
 import mate.academy.spring.online.bookstore.dto.category.CategoryDto;
 import mate.academy.spring.online.bookstore.dto.category.CreateCategoryRequestDto;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
@@ -51,8 +63,10 @@ class CategoryControllerTest {
     void setUp(@Autowired DataSource dataSource) throws SQLException {
         teardown(dataSource);
         try (Connection connection = dataSource.getConnection()) {
-            ScriptUtils.executeSqlScript(connection, new ClassPathResource(INSERT_CATEGORIES_SCRIPT_PATH));
-            ScriptUtils.executeSqlScript(connection, new ClassPathResource(INSERT_BOOKS_SCRIPT_PATH));
+            ScriptUtils.executeSqlScript(connection,
+                    new ClassPathResource(INSERT_CATEGORIES_SCRIPT_PATH));
+            ScriptUtils.executeSqlScript(connection,
+                    new ClassPathResource(INSERT_BOOKS_SCRIPT_PATH));
         }
     }
 
@@ -90,7 +104,8 @@ class CategoryControllerTest {
                 .andExpect(status().isCreated())
                 .andReturn();
 
-        CategoryDto resultDto = objectMapper.readValue(result.getResponse().getContentAsString(), CategoryDto.class);
+        CategoryDto resultDto = objectMapper.readValue(result.getResponse()
+                .getContentAsString(), CategoryDto.class);
 
         assertNotNull(resultDto);
         assertEquals(expectedDto.name(), resultDto.name());
@@ -105,7 +120,8 @@ class CategoryControllerTest {
         String updatedName = "UpdatedName";
         String updatedDescription = "UpdatedDescription";
 
-        CreateCategoryRequestDto updateRequest = new CreateCategoryRequestDto(updatedName, updatedDescription);
+        CreateCategoryRequestDto updateRequest = new CreateCategoryRequestDto(updatedName,
+                updatedDescription);
 
         String jsonRequest = objectMapper.writeValueAsString(updateRequest);
 
@@ -115,7 +131,8 @@ class CategoryControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        CategoryDto resultDto = objectMapper.readValue(result.getResponse().getContentAsString(), CategoryDto.class);
+        CategoryDto resultDto = objectMapper.readValue(result.getResponse()
+                .getContentAsString(), CategoryDto.class);
 
         assertNotNull(resultDto);
         assertEquals(categoryId, resultDto.id());
@@ -157,14 +174,22 @@ class CategoryControllerTest {
     @DisplayName("Get category by valid id")
     @WithMockUser(username = "user", roles = {"USER"})
     void getCategoryById_ValidId_ShouldReturnCategoryDto() throws Exception {
-        CategoryDto expectedDto = expectedCategoryResponseDto();
+        // Ми явно вказуємо категорію з ID 1, яка є у твоєму SQL-скрипті
+        CategoryDto expectedDto = new CategoryDto(
+                1L,
+                "Poetry",
+                "Poetry books"
+        );
 
         MvcResult result = mockMvc.perform(get("/categories/{id}", expectedDto.id())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        CategoryDto resultDto = objectMapper.readValue(result.getResponse().getContentAsString(), CategoryDto.class);
+        CategoryDto resultDto = objectMapper.readValue(
+                result.getResponse().getContentAsString(),
+                CategoryDto.class
+        );
 
         verifyCategoryDto(expectedDto, resultDto);
     }
@@ -173,7 +198,7 @@ class CategoryControllerTest {
     @DisplayName("Get books by category ID")
     @WithMockUser(username = "user", roles = {"USER"})
     void getBooksByCategoryId_ValidId_ShouldReturnListOfBooks() throws Exception {
-        Long categoryId = 2L;
+        Long categoryId = 1L;
 
         MvcResult result = mockMvc.perform(get("/categories/{id}/books", categoryId)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -181,10 +206,11 @@ class CategoryControllerTest {
                 .andReturn();
 
         String jsonResponse = result.getResponse().getContentAsString();
-        BookDtoWithoutCategoryIds[] books = objectMapper.readValue(jsonResponse, BookDtoWithoutCategoryIds[].class);
+        BookDtoWithoutCategoryIds[] books = objectMapper.readValue(jsonResponse,
+                BookDtoWithoutCategoryIds[].class);
 
         assertNotNull(books);
-        assertEquals(1, books.length, "Expected 1 books in category with ID 2");
+        assertEquals(1, books.length, "Expected 1 books in category with ID 1");
 
         for (BookDtoWithoutCategoryIds book : books) {
             assertNotNull(book.title(), "The title of book cann’t be null");
@@ -195,7 +221,7 @@ class CategoryControllerTest {
     @Test
     @DisplayName("Get all categories with pagination")
     @WithMockUser(username = "user", roles = {"USER"})
-    void getAllCategories_ShouldReturnPagedCategoryDtos() throws Exception {
+    void getAllCategories_ShouldReturnPagedCategoryDto() throws Exception {
         MvcResult result = mockMvc.perform(get("/categories")
                         .param("page", "0")
                         .param("size", "10")
@@ -217,7 +243,6 @@ class CategoryControllerTest {
         assertNotNull(firstCategory.get("name"));
         assertNotNull(firstCategory.get("description"));
     }
-
 
     @Test
     @DisplayName("Delete category by id")
@@ -245,6 +270,7 @@ class CategoryControllerTest {
         assertNotNull(actual, "CategoryDto cann’t be null.");
         assertEquals(expected.id(), actual.id(), "Category ID does not match.");
         assertEquals(expected.name(), actual.name(), "The category name doesn’t match.");
-        assertEquals(expected.description(), actual.description(), "Category description doesn’t match.");
+        assertEquals(expected.description(),
+                actual.description(), "Category description doesn’t match.");
     }
 }

@@ -1,5 +1,17 @@
 package mate.academy.spring.online.bookstore.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
 import mate.academy.spring.online.bookstore.dto.book.BookDtoWithoutCategoryIds;
 import mate.academy.spring.online.bookstore.dto.category.CategoryDto;
 import mate.academy.spring.online.bookstore.dto.category.CreateCategoryRequestDto;
@@ -20,14 +32,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 public class CategoryServiceTest {
 
@@ -46,13 +50,15 @@ public class CategoryServiceTest {
     @Test
     @DisplayName("Save category with valid request should return CategoryDto")
     void save_ValidCreateCategoryDto_ReturnsCategoryDto() {
-        CreateCategoryRequestDto requestDto = new CreateCategoryRequestDto("Fiction", "Fiction books");
+        CreateCategoryRequestDto requestDto = new CreateCategoryRequestDto("Fiction",
+                "Fiction books");
 
         Category category = new Category()
                 .setName(requestDto.name())
                 .setDescription(requestDto.description());
 
-        CategoryDto categoryDto = new CategoryDto(1L, category.getName(), category.getDescription());
+        CategoryDto categoryDto = new CategoryDto(1L, category.getName(),
+                category.getDescription());
 
         when(categoryMapper.toModel(requestDto)).thenReturn(category);
         when(categoryRepository.save(category)).thenReturn(category);
@@ -78,7 +84,8 @@ public class CategoryServiceTest {
         category.setName("Fiction");
         category.setDescription("Fiction books");
 
-        CategoryDto categoryDto = new CategoryDto(1L, category.getName(), category.getDescription());
+        CategoryDto categoryDto = new CategoryDto(1L, category.getName(),
+                category.getDescription());
 
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
         when(categoryMapper.toDto(category)).thenReturn(categoryDto);
@@ -94,7 +101,8 @@ public class CategoryServiceTest {
         Long categoryId = 100L;
 
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.empty());
-        assertThrows(EntityNotFoundException.class, () -> categoryService.findCategoryById(categoryId));
+        assertThrows(EntityNotFoundException.class,
+                () -> categoryService.findCategoryById(categoryId));
     }
 
     @Test
@@ -117,7 +125,8 @@ public class CategoryServiceTest {
                 .setName("Fiction")
                 .setDescription("Fiction book");
 
-        CategoryDto categoryDto = new CategoryDto(category.getId(), category.getName(), category.getDescription());
+        CategoryDto categoryDto = new CategoryDto(category.getId(),
+                category.getName(), category.getDescription());
 
         Pageable pageable = PageRequest.of(0, 10);
 
@@ -137,14 +146,16 @@ public class CategoryServiceTest {
     void update_ValidUpdateCategory_UpdateCategory() {
         Long categoryId = 1L;
 
-        CreateCategoryRequestDto requestDto = new CreateCategoryRequestDto("Updated Fiction", "Updated description");
+        CreateCategoryRequestDto requestDto = new CreateCategoryRequestDto("Updated Fiction",
+                "Updated description");
 
         Category category = new Category();
         category.setId(categoryId);
         category.setName(requestDto.name());
         category.setDescription(requestDto.description());
 
-        CategoryDto categoryDto = new CategoryDto(categoryId, category.getName(), category.getDescription());
+        CategoryDto categoryDto = new CategoryDto(categoryId, category.getName(),
+                category.getDescription());
 
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
 
@@ -162,11 +173,14 @@ public class CategoryServiceTest {
     @DisplayName("Update category with non-existing ID should throw exception")
     void update_ValidUpdateCategory_WithNonExistingId_ShouldThrowEntityNotFoundException() {
         Long categoryId = 999L;
-        CreateCategoryRequestDto requestDto = new CreateCategoryRequestDto("Non-existent category", "Non-existent category description");
+        CreateCategoryRequestDto requestDto = new CreateCategoryRequestDto("Non-existent category",
+                "Non-existent category description");
 
-        when(categoryRepository.findById(categoryId)).thenReturn(Optional.empty());
+        when(categoryRepository.findById(categoryId))
+                .thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class, () -> categoryService.update(categoryId, requestDto));
+        assertThrows(EntityNotFoundException.class,
+                () -> categoryService.update(categoryId, requestDto));
     }
 
     @Test

@@ -1,13 +1,16 @@
 package mate.academy.spring.online.bookstore.repository;
 
-import mate.academy.spring.online.bookstore.dto.book.BookDtoWithoutCategoryIds;
-import mate.academy.spring.online.bookstore.model.Book;
-import mate.academy.spring.online.bookstore.repository.book.BookRepository;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import javax.sql.DataSource;
 import lombok.SneakyThrows;
+import mate.academy.spring.online.bookstore.dto.book.BookDtoWithoutCategoryIds;
+import mate.academy.spring.online.bookstore.repository.book.BookRepository;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -17,8 +20,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -31,7 +32,7 @@ public class BookRepositoryTest {
     private static final String DELETE_ALL_SCRIPT_PATH = "database/delete-all-data-db.sql";
 
     @Autowired
-    BookRepository bookRepository;
+    private BookRepository bookRepository;
 
     @BeforeAll
     static void beforeAll(@Autowired DataSource dataSource) throws SQLException {
@@ -71,7 +72,8 @@ public class BookRepositoryTest {
     void findByCategoriesId_CategoryExists_ShouldReturnBooks() {
         Long existingCategoryId = 5L;
 
-        List<BookDtoWithoutCategoryIds> books = bookRepository.findByCategoriesId(existingCategoryId);
+        List<BookDtoWithoutCategoryIds> books = bookRepository
+                .findByCategoriesId(existingCategoryId);
 
         assertNotNull(books, "Result list should not be null.");
         assertFalse(books.isEmpty(), "Books list should not be empty for existing category.");
@@ -82,8 +84,8 @@ public class BookRepositoryTest {
     void findByCategoriesId_CategoryDoesNotExist_ShouldReturnEmptyList() {
         Long nonExistingCategoryId = 999L;
 
-        List<BookDtoWithoutCategoryIds> books = bookRepository.findByCategoriesId(nonExistingCategoryId);
-
+        List<BookDtoWithoutCategoryIds> books = bookRepository
+                .findByCategoriesId(nonExistingCategoryId);
 
         assertNotNull(books, "Result list should not be null.");
         assertTrue(books.isEmpty(), "Books list should be empty for non-existing category.");
