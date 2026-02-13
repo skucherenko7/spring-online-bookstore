@@ -46,7 +46,7 @@ This project is an application with a multi-level architecture:
 
 ### **The scheme of relationships in the database**:
 
-![Scheme](scheme-relationships-bookstore.png)
+![Bookstore Schema](images/scheme-relationships-bookstore.png)
 
 ---
 
@@ -97,7 +97,7 @@ The system is implemented on the basis of RESTful architecture and includes the 
 
 Before starting, make sure you have the following components installed:
 
-![Scheme](scheme-system-requirements.png)
+![System Requirements](images/scheme-system-requirements.png)
 
 ---
 
